@@ -9,7 +9,7 @@ interface UnifiedSelectorProps {
   onClear?: () => void;
   children: React.ReactNode;
   required?: boolean;
-  count?: number; // ⭐ חדש - כמות פריטים שנבחרו
+  count?: number;
 }
 
 export default function UnifiedSelector({

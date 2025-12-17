@@ -12,16 +12,13 @@ export default function DressGrid({
   onRemoved,
   isWishlistPage,
 }: DressGridProps) {
-  // הסרנו את הפיצול ל-totalPages כדי לאפשר זרימה רציפה של ה-Grid
   
   return (
     <InfiniteScrollContainer hasMore={hasMore} loadMore={loadMore}>
-      {/* הגריד הראשי מכיל כעת את כל השמלות ישירות */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
         {dresses.map((dress, index) => (
           <div 
             key={dress.dressID}
-            // אנחנו שומרים על ה-data-page ברמת הפריט כדי שה-Observer ימשיך לעבוד
             data-page={Math.floor(index / 25) + 1}
           >
             <DressCard

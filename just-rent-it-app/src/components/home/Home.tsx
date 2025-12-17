@@ -17,7 +17,7 @@ export default async function Home() {
   if (mostViewedCache && now - cacheTime < CACHE_TTL) {
     mostViewed = mostViewedCache; 
   } else {
-    mostViewed = await getMostViewedDresses(); // קריאה חדשה
+    mostViewed = await getMostViewedDresses(); 
     mostViewedCache = mostViewed;
     cacheTime = now;
   }

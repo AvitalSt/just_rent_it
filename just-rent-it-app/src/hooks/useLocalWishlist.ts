@@ -26,7 +26,6 @@ export function useLocalWishlist() {
   localStorage.setItem("local-wishlist", JSON.stringify(newList));
   setLocalWishlist(newList);
 
-  // אם המשתמש לא מחובר והרשימה ריקה לפני הוספה, הצג מודל
   if (!isUserLoggedIn && stored.length === 0 && !exists) {
     setPendingDressId(dressId);
     setShowConfirm(true);
@@ -45,10 +44,8 @@ export function useLocalWishlist() {
 
   const isFavorite = (dressId: number) => localWishlist.includes(dressId);
 
-  // פונקציות למודל
   const handleConfirm = () => {
     if (pendingDressId !== null) {
-      // כאן אפשר להפנות ללוגין
       window.location.href = "/login";
     }
   };

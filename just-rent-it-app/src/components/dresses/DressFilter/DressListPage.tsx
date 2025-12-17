@@ -47,16 +47,13 @@ export default function DressListPage() {
     orderBy: "",
   };
 
-  //parseUrlToFilters יודע לקרוא את ה-URL ולפרק אותו למבנה מסודר של filters
   const initialFilters = parseUrlToFilters(
-    searchParams, //מאפשר לקורא את המחרוזת מURL
-    defaultFilters, //מבנה בסיסי של הפילטרים
-    maxPrice //מגיע מהשרת מה המחיר הגבוה ביותר
+    searchParams, 
+    defaultFilters, 
+    maxPrice 
   );
 
-  //הפילטרים הפעילים
   const [filters, setFilters] = useState<DressFilters>(initialFilters);
-  //פילטרים שהמשתמש סימן אבל עוד לא אישר
   const [draftFilters, setDraftFilters] = useState<DressFilters>({
     ...initialFilters,
   });
@@ -83,7 +80,6 @@ export default function DressListPage() {
         (f.priceMax === 9999999 || f.priceMax === maxPrice)
       )
         continue;
-      //כולם נכנסים לפה
       if (value !== undefined) params.set(key, value);
     }
 

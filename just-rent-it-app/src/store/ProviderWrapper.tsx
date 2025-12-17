@@ -1,4 +1,3 @@
-//קובת שעוטף את כל האפלקציה עם <Provider> של Redux 
 "use client";
 
 import { ReactNode } from "react";

@@ -28,7 +28,6 @@ export default function InterestFilterDrawer({
           onClick={() => setOpen(false)}
         >
           <div
-            //לחיצה בתוך בדראוור לא קורה כלוום
             className="absolute right-0 top-0 h-screen w-[370px] bg-white shadow-xl p-6 overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >

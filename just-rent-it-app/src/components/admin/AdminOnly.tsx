@@ -3,7 +3,6 @@
 import { useAppSelector } from "@/store/hooks";
 import Loading from "../ui/Loading";
 
-//React.ReactNode כל מה שריקאט יודעת להציג
 export default function AdminOnly({ children }: { children: React.ReactNode }) {
   const user = useAppSelector((state) => state.user.user);
 

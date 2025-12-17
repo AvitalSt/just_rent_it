@@ -25,7 +25,6 @@ export default function PriceFilter({
 
     const api = (slider as any).noUiSlider;
 
-    // אם כבר קיים – רק עדכון
     if (api) {
       api.updateOptions(
         {

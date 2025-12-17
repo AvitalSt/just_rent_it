@@ -24,7 +24,6 @@ export function mapFiltersToInterestParams(filters: InterestDraftFilters) {
   return params;
 }
 
-// שליחת התעניינות
 export async function sendInterest(
   dressId: number,
   message: string
@@ -38,7 +37,6 @@ export async function sendInterest(
   );
 }
 
-// הבאת כל ההתעניינויות (מנהל)
 export async function getFilteredInterests(
   params: InterestFilterParams
 ): Promise<PagedResultDTO<InterestListDTO>> {
@@ -55,7 +53,6 @@ export async function getFilteredInterests(
   return res.data.data;
 }
 
-// עדכון סטטוס
 export const updateStatus = async (id: number, status: string) => {
   const token = getToken();
 
@@ -71,7 +68,6 @@ export const updateStatus = async (id: number, status: string) => {
   );
 };
 
-// עדכון הערות מנהלת
 export const updateNotes = async (id: number, notes: string) => {
   const token = getToken();
 
@@ -87,7 +83,6 @@ export const updateNotes = async (id: number, notes: string) => {
   );
 };
 
-// הערת בעלת השמלה
 export const updateOwnerComment = async (id: number, comment: string) => {
   const token = getToken();
 
@@ -103,7 +98,6 @@ export const updateOwnerComment = async (id: number, comment: string) => {
   );
 };
 
-// הערת המשתמשת
 export const updateUserComment = async (id: number, comment: string) => {
   const token = getToken();
 
@@ -119,7 +113,6 @@ export const updateUserComment = async (id: number, comment: string) => {
   );
 };
 
-// שליחת מייל לבעלת השמלה
 export const messageOwner = async (id: number) => {
   const token = getToken();
 
@@ -130,7 +123,6 @@ export const messageOwner = async (id: number) => {
   );
 };
 
-// שליחת מייל למתעניינת
 export const messageUser = async (id: number) => {
   const token = getToken();
 

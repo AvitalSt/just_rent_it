@@ -17,7 +17,6 @@ export default function UnifiedSelectString({
   const selectedLabel =
     options.find((o) => o.value === value)?.label || "בחרי אפשרות";
 
-  // סגירה בלחיצה מחוץ לרכיב
   useEffect(() => {
     const close = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) {

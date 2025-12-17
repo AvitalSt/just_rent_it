@@ -1,6 +1,11 @@
-﻿namespace JustRentItAPI
-{
-    public class _
-    {
-    }
-}
+﻿bin/
+obj/
+
+appsettings.json
+appsettings.Development.json
+
+*.db
+*.mdf
+*.ldf
+
+secrets.json

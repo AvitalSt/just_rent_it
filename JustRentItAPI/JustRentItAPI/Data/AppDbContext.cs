@@ -76,10 +76,6 @@ namespace JustRentItAPI.Data
                 .HasForeignKey(i => i.DressID)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // ------------------------
-            // Many-to-Many עם Cascade למחיקת Dress בלבד
-            // ------------------------
-
             // Dress - Color
             modelBuilder.Entity<DressColor>()
                 .HasKey(dc => new { dc.DressID, dc.ColorID });

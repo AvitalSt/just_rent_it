@@ -10,7 +10,6 @@ import { ErrorMessage } from "../ui/ErrorMessage";
 import { useDispatch } from "react-redux";
 import { handleSuccessfulAuth } from "@/utils/authHelpers";
 
-// טעינה של GoogleLogin רק בצד לקוח
 const GoogleLogin = dynamic(
   () => import("@react-oauth/google").then((mod) => mod.GoogleLogin),
   { ssr: false }

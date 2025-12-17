@@ -1,0 +1,47 @@
+# Just Rent It
+
+Just Rent It is a full-stack dress rental platform built with **Next.js** and **.NET**.
+
+The system allows users to browse a dress collection, manage a favorites list, send inquiries for up to two dresses per day, receive the dress owner’s contact details by email, and download a dress catalog.
+
+An admin interface is also provided for managing dresses, updating the catalog, handling customer inquiries, and sending monthly updates to users about the dresses they showed interest in.
+
+## Features
+
+### User Side
+- Full user registration and login system, including JWT authentication, password encryption, Google login, and forgot password flow  
+- Browse and filter a wide range of dresses  
+- Lazy loading with infinite scroll for improved performance and user experience  
+- Send dress inquiries and receive the dress owner’s details by email (the dress owner is notified at the same time)  
+- Manage personal favorites list  
+- Download the dress catalog  
+
+### Admin Side
+- Full dress management including editing and deleting dresses  
+- Table view of all inquiries with inline editing and action buttons for notifying dress owners  
+- Option to export the inquiries table to an Excel file  
+- Send a monthly summary email to all users and dress owners with updates about dresses that were inquired about during the month  
+- Update catalog content  
+
+## Tech Stack
+
+### Frontend
+- Next.js  
+- React  
+- TypeScript  
+- Tailwind CSS  
+
+### Backend
+- .NET / ASP.NET Web API  
+- Entity Framework  
+- SQL Server  
+
+## Project Structure
+
+- Client: Next.js frontend application  
+- Server: .NET Web API backend  
+- RESTful communication between client and server  
+
+## Notes
+
+This project was developed as part of a full-stack learning process, with a focus on clean architecture, maintainable code, performance optimization, and real-world application flow.

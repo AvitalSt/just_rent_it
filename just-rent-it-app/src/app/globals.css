@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+font-family: var(--font-heebo), sans-serif;
+}
+
+input[type="number"] {
+  direction: rtl;
+  text-align: right;
+}
+
+/* החצים בצד שמאל בלבד */
+/* input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  position: absolute;
+  right: auto !important;
+  left: 8px !important; 
+  margin-left: 0;
+} */
+
+.noUi-target {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.noUi-base {
+  background: #e0e0e0 !important;
+  height: 3px !important;
+  border-radius: 999px !important;
+}
+
+.noUi-connects {
+  overflow: hidden !important;
+  border-radius: 999px !important;
+}
+
+.noUi-connect {
+  background: #000 !important;
+  height: 3px !important;
+  border-radius: 999px !important;
+}
+
+/* הידיות — יציבות, ממורכזות, בלי translateX */
+.noUi-handle {
+  width: 16px !important;
+  height: 16px !important;
+  background: #fff !important;
+  border: 2px solid #000 !important;
+  border-radius: 50% !important;
+  cursor: grab !important;
+  box-shadow: none !important;
+
+  /* מרכז אמיתי לפי גבהים */
+  top: -7px !important;
+}
+
+.noUi-handle:before,
+.noUi-handle:after {
+  display: none !important;
+}
+
+.noUi-handle:hover {
+  transform: scale(1.15);
+}
+
+.noUi-handle:active {
+  cursor: grabbing !important;
+}
+
+select option:checked {
+  background-color: white !important;
+  color: black !important;
+}
+
+select {
+  background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' ...'></svg>");
+  background-repeat: no-repeat;
+  background-position: left 12px center;
+}

@@ -13,6 +13,7 @@ import {
   SizeDTO,
 } from "@/models/DTOs/OptionsDTO";
 import { UpdateDressDTO } from "@/models/DTOs/UpdateDressDTO";
+import { clearDressesCache } from "@/services/dressCache";
 
 export function useDressEdit(
   dress: DressDTO,
@@ -159,6 +160,7 @@ export function useDressEdit(
     if (form.price && form.price > 0) dto.Price = form.price;
 
     await updateDress(dress.dressID, dto);
+    clearDressesCache();
     onSaved();
   };
 

@@ -37,6 +37,9 @@ namespace JustRentItAPI.Repositories.Interfaces
 
         Task<List<Dress>> GetMostViewedAsync(int count = 8);
 
+        Task<Dress?> GetByIdForUpdateAsync(int id);
+
 /*        Task<List<Dress>> GetByUserIdAsync(int userId);
-*/    }
+*/
+      }
 }

@@ -14,32 +14,22 @@ export const AppWrapper: React.FC<AppWrapperProps> = ({ children }) => {
   const user = useAppSelector((state) => state.user.user);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token || user) return;
+
     const fetchCurrentUser = async () => {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        dispatch(clearUser());
-        return;
-      }
-
-      if (user) return;
-
       try {
         const res = await currentUser(token);
-        if (res) {
-          dispatch(setUser({ user: res }));
-          dispatch(setWishlistDressIds(res.wishlistDressIds));
-        } else {
-          dispatch(clearUser());
-        }
-      } catch (err) {
+        dispatch(setUser({ user: res }));
+        dispatch(setWishlistDressIds(res.wishlistDressIds));
+      } catch {
         localStorage.removeItem("token");
         dispatch(clearUser());
       }
     };
 
     fetchCurrentUser();
-  }, [dispatch, user]);
+  }, [user, dispatch]);
 
   return <>{children}</>;
 };

@@ -20,10 +20,10 @@ import { validateAddDress } from "@/utils/addDressValidation";
 import UnifiedSelector from "@/components/ui/filters/UnifiedSelector";
 import { SingleSelect } from "@/components/ui/filters/SingleSelect";
 import { DressStateMap, SaleTypeMap } from "@/models/Enums/filtersMap";
-import { CheckboxField } from "@/components/ui/CheckboxField";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { useRouter } from "next/navigation";
 import PolicySection from "./PolicySection";
+import { clearDressesCache } from "@/services/dressCache";
 
 export default function AddDressForm() {
   const { colors, sizes, cities, ageGroups, eventTypes } = useAppSelector(
@@ -105,6 +105,8 @@ export default function AddDressForm() {
         MainImage: main,
       });
 
+      clearDressesCache();
+      
       setShowSuccessModal(true);
 
       setForm({

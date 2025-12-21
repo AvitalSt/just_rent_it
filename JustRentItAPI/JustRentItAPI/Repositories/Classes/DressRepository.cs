@@ -18,10 +18,22 @@ namespace JustRentItAPI.Repositories.Classes
             _context = appDbContext;
         }
 
-        private IQueryable<Dress> GetDressQuery()
+        private IQueryable<Dress> GetReadQuery()
         {
             return _context.Dresses
                 .AsNoTracking()
+                .Include(d => d.User)
+                .Include(d => d.Colors).ThenInclude(dc => dc.Color)
+                .Include(d => d.Sizes).ThenInclude(ds => ds.Size)
+                .Include(d => d.Cities).ThenInclude(dc => dc.City)
+                .Include(d => d.AgeGroups).ThenInclude(da => da.AgeGroup)
+                .Include(d => d.EventTypes).ThenInclude(de => de.EventType)
+                .Include(d => d.Images);
+        }
+
+        private IQueryable<Dress> GetTrackingQuery()
+        {
+            return _context.Dresses
                 .Include(d => d.User)
                 .Include(d => d.Colors).ThenInclude(dc => dc.Color)
                 .Include(d => d.Sizes).ThenInclude(ds => ds.Size)
@@ -56,7 +68,7 @@ namespace JustRentItAPI.Repositories.Classes
         {
             //AsNoTracking זה אובייקטים לקריאה בלבד אל תעקוב אחריהם- גורם לזה להיות מהיר יותר
             //AsQueryable - IQueryable שאילתה שניתן להוסיף עליה עוד תנאים- לפני שהיא פועלת במוסד נתונים- שאילתות דינמיות 
-            var query = GetDressQuery().AsQueryable();
+            var query = GetReadQuery().AsQueryable();
 
             if (colorIDs != null && colorIDs.Any())
             {
@@ -153,7 +165,7 @@ namespace JustRentItAPI.Repositories.Classes
 
         public async Task<Dress?> GetByIdAsync(int id)
         {
-            return await GetDressQuery().FirstOrDefaultAsync(d => d.DressID == id);
+            return await GetReadQuery().FirstOrDefaultAsync(d => d.DressID == id);
         }
 
         public async Task DeleteImageAsync(DressImage image)
@@ -168,7 +180,7 @@ namespace JustRentItAPI.Repositories.Classes
             await _context.SaveChangesAsync();
 
             //EF לא טוען קשרים אוטומטית בעת שמירה ולכן אני שולפת את האובייקט מחדש עם Include כדי לקבל אובייקט מלא למיפוי ל־DTO ולמניעת Lazy Loading
-            var savedDress = await GetDressQuery()
+            var savedDress = await GetReadQuery()
                 .FirstOrDefaultAsync(d => d.DressID == dress.DressID);
 
             return savedDress;
@@ -176,7 +188,6 @@ namespace JustRentItAPI.Repositories.Classes
 
         public async Task UpdateAsync(Dress dress)
         {
-            _context.Dresses.Update(dress);
             await _context.SaveChangesAsync();
         }
 
@@ -205,9 +216,14 @@ namespace JustRentItAPI.Repositories.Classes
                 .ToListAsync();
         }
 
-   /*     public async Task<List<Dress>> GetByUserIdAsync(int userId)
+        public async Task<Dress?> GetByIdForUpdateAsync(int id)
         {
-            return await _context.Dresses.Where(d => d.UserID == userId && d.Status == DressStatus.Active).ToListAsync();
-        }*/
+            return await GetTrackingQuery()
+                .FirstOrDefaultAsync(d => d.DressID == id);
+        }
+        /*     public async Task<List<Dress>> GetByUserIdAsync(int userId)
+             {
+                 return await _context.Dresses.Where(d => d.UserID == userId && d.Status == DressStatus.Active).ToListAsync();
+             }*/
     }
 }

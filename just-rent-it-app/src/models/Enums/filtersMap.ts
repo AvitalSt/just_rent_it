@@ -22,8 +22,8 @@ export const DressStatusMap: Record<number, string> = {
 
 export const OrderByMap: Record<string, string> = {
   "": "ברירת מחדל",
-  "price_asc": "מחיר — מהזול ליקר",
-  "price_desc": "מחיר — מהיקר לזול",
+  "price_asc": "מחיר - מהזול ליקר",
+  "price_desc": "מחיר - מהיקר לזול",
   "most_viewed": "נצפה ביותר",
   "newest": "חדשים באתר",
 };

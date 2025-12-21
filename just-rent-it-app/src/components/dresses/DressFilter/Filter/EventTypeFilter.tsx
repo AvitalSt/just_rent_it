@@ -5,18 +5,21 @@ import UnifiedSelector from "@/components/ui/filters/UnifiedSelector";
 import { MultiSelect } from "@/components/ui/filters/MultiSelect";
 import { FilterMultiSelectProps } from "@/models/types/dress/FilterMultiSelect.types";
 
-export default function EventTypeFilter({ value, onChange }: FilterMultiSelectProps) {
+export default function EventTypeFilter({
+  value,
+  onChange,
+}: FilterMultiSelectProps) {
   const list = useAppSelector((s) => s.options.eventTypes);
 
   return (
     <UnifiedSelector
-      label="מתאים לאירוע"
+      label="קטגוריה שמלות"
       hasValue={value.length > 0}
       onClear={() => onChange([])}
-      count={value.length}   
+      count={value.length}
     >
       <MultiSelect
-        label="מתאים לאירוע"
+        label="קטגוריה שמלות"
         options={list.map((item) => ({
           value: item.id,
           label: item.nameHebrew,

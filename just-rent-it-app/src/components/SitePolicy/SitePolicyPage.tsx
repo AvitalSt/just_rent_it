@@ -9,14 +9,14 @@ export default function SitePolicy() {
             תקנון האתר
           </h1>
           <p className="text-base sm:text-lg opacity-90 font-light">
-            JustRentIt - פלטפורמה שיתופית להשכרת שמלות
+            JustRentIt פלטפורמה שיתופית להשכרת שמלות
           </p>
         </div>
 
         <div className="py-10 px-8 sm:px-12">
           <div className="text-base leading-relaxed text-neutral-700 mb-10 p-6 bg-neutral-50 border-r-4 border-black rounded-lg">
-            ברוכה הבאה ל-<strong>JustRentIt</strong> - הפלטפורמה השיתופית
-            המובילה להשכרת שמלות לאירועים.
+            ברוכה הבאה ל-<strong>JustRentIt</strong> הפלטפורמה השיתופית המובילה
+            להשכרת שמלות לאירועים.
             <br />
             האתר משמש מרחב אונליין שבו משתמשות יכולות להעלות שמלות להשכרה,{" "}
             ובמקביל לחפש את השמלה המושלמת לאירוע הבא שלהן.
@@ -56,6 +56,12 @@ export default function SitePolicy() {
                   העמלה תשולם באמצעות העברה בנקאית או באמצעי תשלום אחר שיוגדר.
                   <br />
                   פרטים נוספים יימסרו בעת הצורך.
+                  <br />
+                  <br />
+                  <strong className="text-black">
+                    את אחראית לשלם את העמלה בהקדם האפשרי - אי תשלום ייחשב לגזל
+                    גמור!
+                  </strong>
                 </p>
               </div>
 
@@ -106,9 +112,9 @@ export default function SitePolicy() {
                   <br />
                   בסוף כל חודש תקבלי מהאתר{" "}
                   <strong className="text-black">
-                    סיכום חודשי על כל ההתעניינויות שהיו בשמלות שלך (במידה והיו)
+                    סיכום חודשי על כל ההתעניינויות שהיו בשמלות שלך
                   </strong>
-                  ,
+                  (במידה והיו),
                   <br />
                   ותעדכני האם יצרו איתך קשר והאם בוצעה השכרה/מכירה.
                   <br />
@@ -134,7 +140,8 @@ export default function SitePolicy() {
               <p className="text-base leading-relaxed text-neutral-600">
                 אם בוצעה עסקה דרך האתר: <br />
                 יישלח אלייך מייל הכולל הסבר מסודר לגבי תשלום העמלה (15%).
-              <br /><br />
+                <br />
+                <br />
                 שימי לב: אתר JustRentIt <strong>לא אחראי לכל נזק</strong> שייגרם
                 לשמלה במהלך השכרה או שימוש.
               </p>

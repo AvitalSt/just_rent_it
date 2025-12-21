@@ -90,7 +90,7 @@ export default function DressSelectFields({
       </UnifiedSelector>
 
       <UnifiedSelector
-        label="מתאים לאירוע"
+        label="קטגוריה שמלות"
         hasValue={formData.EventTypeIds.length > 0}
         count={formData.EventTypeIds.length}
         onClear={() => handleChange("EventTypeIds", [])}
@@ -101,7 +101,7 @@ export default function DressSelectFields({
         </p>
 
         <MultiSelect
-          label="מתאים לאירוע"
+          label="קטגוריה שמלות"
           options={eventTypes.map((e) => ({
             value: e.id,
             label: e.nameHebrew,

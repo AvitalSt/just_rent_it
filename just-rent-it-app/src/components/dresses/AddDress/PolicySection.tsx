@@ -3,7 +3,10 @@
 import { CheckboxField } from "@/components/ui/CheckboxField";
 import { PolicySectionProps } from "@/models/types/dress/PolicySection.types";
 
-export default function PolicySection({ accepted, onChange }: PolicySectionProps) {
+export default function PolicySection({
+  accepted,
+  onChange,
+}: PolicySectionProps) {
   return (
     <div className="bg-white border border-gray-200 rounded-lg p-5 space-y-4">
       <div className="flex items-center gap-2 pb-3 border-b border-gray-200">
@@ -24,10 +27,8 @@ export default function PolicySection({ accepted, onChange }: PolicySectionProps
 
           <li>
             אני יודעת שבסוף כל חודש אקבל מהאתר{" "}
-            <strong>
-              סיכום חודשי על כל ההתעניינויות שהיו בשמלות שלי (במידה והיו)
-            </strong>
-            , ואעדכן האם בוצעה השכרה/מכירה. <br />
+            <strong>סיכום חודשי על כל ההתעניינויות שהיו בשמלות שלי </strong>
+            (במידה והיו), ואעדכן האם בוצעה השכרה/מכירה. <br />
             <strong>ללא עדכון - השמלה עשויה לרדת מהאתר.</strong>
           </li>
         </ul>
@@ -40,7 +41,7 @@ export default function PolicySection({ accepted, onChange }: PolicySectionProps
           rel="noopener noreferrer"
           className="underline text-xs"
         >
-          תקנון האתר
+          תקנון האתר המלא
         </a>
 
         <CheckboxField

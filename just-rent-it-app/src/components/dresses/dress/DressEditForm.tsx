@@ -12,7 +12,6 @@ import EventTypeFilter from "../DressFilter/Filter/EventTypeFilter";
 import {
   SaleTypeMap,
   DressStateMap,
-  DressStatusMap,
 } from "@/models/Enums/filtersMap";
 
 import { useDressEdit } from "@/hooks/useDressEdit";
@@ -193,23 +192,6 @@ export default function DressEditForm({
               }))}
               selected={form.state}
               onChange={(v) => setForm({ ...form, state: v })}
-            />
-          </UnifiedSelector>
-
-          <UnifiedSelector
-            label="סטטוס מנהל"
-            hasValue={form.status !== null}
-            onClear={() => setForm({ ...form, status: EMPTY_VALUE })}
-            count={form.status !== EMPTY_VALUE ? 1 : 0}
-            required
-          >
-            <SingleSelect
-              options={Object.entries(DressStatusMap).map(([value, label]) => ({
-                value: Number(value),
-                label,
-              }))}
-              selected={form.status}
-              onChange={(v) => setForm({ ...form, status: v })}
             />
           </UnifiedSelector>
         </div>

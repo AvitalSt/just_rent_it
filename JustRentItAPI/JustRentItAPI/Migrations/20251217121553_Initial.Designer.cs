@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace JustRentItAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251113111930_UpdateDressTables")]
-    partial class UpdateDressTables
+    [Migration("20251217121553_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -45,7 +45,7 @@ namespace JustRentItAPI.Migrations
 
                     b.HasKey("AgeGroupID");
 
-                    b.ToTable("AgeGroup");
+                    b.ToTable("AgeGroups");
                 });
 
             modelBuilder.Entity("JustRentItAPI.Models.Entities.City", b =>
@@ -68,7 +68,7 @@ namespace JustRentItAPI.Migrations
 
                     b.HasKey("CityID");
 
-                    b.ToTable("City");
+                    b.ToTable("Cities");
                 });
 
             modelBuilder.Entity("JustRentItAPI.Models.Entities.Color", b =>
@@ -91,7 +91,7 @@ namespace JustRentItAPI.Migrations
 
                     b.HasKey("ColorID");
 
-                    b.ToTable("Color");
+                    b.ToTable("Colors");
                 });
 
             modelBuilder.Entity("JustRentItAPI.Models.Entities.Dress", b =>
@@ -126,8 +126,8 @@ namespace JustRentItAPI.Migrations
                     b.Property<int>("SaleType")
                         .HasColumnType("int");
 
-                    b.Property<long>("State")
-                        .HasColumnType("bigint");
+                    b.Property<int>("State")
+                        .HasColumnType("int");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -266,7 +266,7 @@ namespace JustRentItAPI.Migrations
 
                     b.HasKey("EventTypeID");
 
-                    b.ToTable("EventType");
+                    b.ToTable("EventTypes");
                 });
 
             modelBuilder.Entity("JustRentItAPI.Models.Entities.Favorite", b =>
@@ -306,9 +306,6 @@ namespace JustRentItAPI.Migrations
                     b.Property<int>("DressID")
                         .HasColumnType("int");
 
-                    b.Property<bool>("IsPaymentTransferred")
-                        .HasColumnType("bit");
-
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(1000)
@@ -324,8 +321,12 @@ namespace JustRentItAPI.Migrations
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
 
-                    b.Property<int>("PaymentAmount")
+                    b.Property<int>("OwnerMailCount")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("PaymentAmount")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
 
                     b.Property<DateTime>("SentDate")
                         .HasColumnType("datetime2");
@@ -341,6 +342,9 @@ namespace JustRentItAPI.Migrations
                     b.Property<int>("UserID")
                         .HasColumnType("int");
 
+                    b.Property<int>("UserMailCount")
+                        .HasColumnType("int");
+
                     b.HasKey("InterestID");
 
                     b.HasIndex("DressID");
@@ -348,6 +352,22 @@ namespace JustRentItAPI.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Interests");
+                });
+
+            modelBuilder.Entity("JustRentItAPI.Models.Entities.MonthlySummary", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("SentAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MonthlySummaries");
                 });
 
             modelBuilder.Entity("JustRentItAPI.Models.Entities.Size", b =>
@@ -358,19 +378,14 @@ namespace JustRentItAPI.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SizeID"));
 
-                    b.Property<string>("NameEnglish")
+                    b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<string>("NameHebrew")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("SizeID");
 
-                    b.ToTable("Size");
+                    b.ToTable("Sizes");
                 });
 
             modelBuilder.Entity("JustRentItAPI.Models.Entities.User", b =>

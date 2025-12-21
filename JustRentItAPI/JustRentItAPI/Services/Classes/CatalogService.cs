@@ -28,7 +28,7 @@ namespace JustRentItAPI.Services.Classes
             _dressRepository = dresses;
             _env = env;
 
-            _baseUrl = config["BaseUrl"];
+            _baseUrl = config["ApiBaseUrl"];
             _catalogPath = Path.Combine(_env.WebRootPath, "catalog.pdf");
 
             _templatesPath = Path.Combine(_env.WebRootPath, "catalog");

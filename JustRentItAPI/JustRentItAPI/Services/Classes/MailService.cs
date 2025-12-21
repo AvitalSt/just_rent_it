@@ -188,7 +188,7 @@ namespace JustRentItAPI.Services.Classes
 
                             שלום {user.FirstName},<br><br>
 
-                            תודה על ההתעניינות בשמלה{dress.Name} ✨<br><br>
+                            תודה על ההתעניינות בשמלה {dress.Name} ✨<br><br>
 
                             <strong>פרטי הקשר של בעלת השמלה:</strong><br>
                             • שם: {owner.FirstName} {owner.LastName}<br>

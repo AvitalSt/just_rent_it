@@ -26,7 +26,7 @@ namespace JustRentItAPI.Services.Classes
             _imageRepository = imageRepository;
             _mailService = mailService;
             _httpContextAccessor = httpContextAccessor;
-            _baseUrl = config["BaseUrl"];
+            _baseUrl = config["FrontendUrl"];
         }
 
 
@@ -105,7 +105,7 @@ namespace JustRentItAPI.Services.Classes
             try
             {
                 var favoriteDressIds = await UserHelper.GetUserFavoriteDressIdsAsync(_httpContextAccessor, _favoriteRepository);
-                var dress = await GetDressAsync(id);
+                var dress = await _dressRepository.GetByIdForUpdateAsync(id);
 
                 if (dress == null)
                     return new Response<DressDTO>
@@ -194,7 +194,7 @@ namespace JustRentItAPI.Services.Classes
         {
             try
             {
-                var dress = await GetDressAsync(id);
+                var dress = await _dressRepository.GetByIdForUpdateAsync(id);
                 if (dress == null)
                     return new Response<DressDTO>
                     {
@@ -232,7 +232,7 @@ namespace JustRentItAPI.Services.Classes
         {
             try
             {
-                var dress = await GetDressAsync(id);
+                var dress = await _dressRepository.GetByIdForUpdateAsync(id);
                 if (dress == null)
                     return new Response<DressDTO>
                     {
@@ -271,7 +271,7 @@ namespace JustRentItAPI.Services.Classes
         {
             try
             {
-                var dress = await GetDressAsync(id);
+                var dress = await _dressRepository.GetByIdForUpdateAsync(id);
                 if (dress == null)
                     return new Response<DressDTO>
                     {

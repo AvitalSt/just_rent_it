@@ -271,12 +271,10 @@ namespace JustRentItAPI.Services.Classes
                                 </p>
 
                                 <p><b>פרטי הבנק להעברה:</b><br/>
-                                בנק מזרחי<br/>
-                                סניף 430<br/>
+                                בנק מזרחי סניף 430<br/>
                                 מספר חשבון: 446904<br/>
                                 על שם: אביטל גולדרינג
                                 </p>
-
                                 <p><b>ניתן לבצע את התשלום גם דרך ביט:</b><br/>
                                 058-3130909
                                 </p>
@@ -298,9 +296,9 @@ namespace JustRentItAPI.Services.Classes
         }
 
 
-        public async Task SendOwnerMonthlySummaryAsync(string ownerEmail, string ownerName, List<(string DressName, List<string> InterestedNames)> dressData)
+        public async Task SendOwnerMonthlySummaryAsync(string ownerEmail, string ownerName, List<(string DressName, string DressUrl, List<string> InterestedNames)> dresses)
         {
-            var body = BuildOwnerSummaryEmail(ownerName, dressData);
+            var body = BuildOwnerSummaryEmail(ownerName, dresses);
 
             await SendEmailAsync(
                 ownerEmail,
@@ -309,12 +307,12 @@ namespace JustRentItAPI.Services.Classes
             );
         }
 
-        public async Task SendUserMonthlySummaryAsync( string userEmail,string userName,List<string> dressNames)
+        public async Task SendUserMonthlySummaryAsync( string userEmail,string userName, List<(string Name, string Url)> dresses)
         {
-            if (dressNames == null || dressNames.Count == 0)
+            if (dresses == null || dresses.Count == 0)
                 return;
 
-            var body = BuildUserSummaryEmail(userName, dressNames);
+            var body = BuildUserSummaryEmail(userName, dresses);
 
             await SendEmailAsync(
                 userEmail,
@@ -323,13 +321,13 @@ namespace JustRentItAPI.Services.Classes
             );
         }
 
-        private string BuildOwnerSummaryEmail(string ownerName, List<(string DressName, List<string> InterestedNames)> dressData)
+        private string BuildOwnerSummaryEmail(string ownerName, List<(string DressName, string DressUrl, List<string> InterestedNames)> dressData)
         {
             // בניית השורות לכל שמלה
             //nbsp Non-Breaking Space מייצר רווח
             //string.Join מחברת מחזורו
             var lines = dressData.Select(d =>
-                $"• בשמלה {d.DressName} התעניינו:<br/>" +
+                $"• בשמלה <a href='{d.DressUrl}' style='font-weight:bold;'>{d.DressName}</a> התעניינו:<br/>" +
                 string.Join("<br/>", d.InterestedNames.Select(n => $"&nbsp;&nbsp;&nbsp;&nbsp;- {n}"))
             );
 
@@ -361,9 +359,9 @@ namespace JustRentItAPI.Services.Classes
                     </div>";
         }
 
-        private string BuildUserSummaryEmail(string userName, List<string> dressNames)
+        private string BuildUserSummaryEmail(string userName, List<(string Name, string Url)> dresses)
         {
-            var listHtml = string.Join("<br/>", dressNames.Select(d => $"• {d}"));
+            var listHtml = string.Join("<br/>", dresses.Select(d => $"• <a href='{d.Url}' style='font-weight:bold;'>{d.Name}</a>"));
 
             return $@"
                     <div dir='rtl' style='font-family: Arial; font-size: 16px; line-height: 1.6;'>

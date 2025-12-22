@@ -2,6 +2,7 @@
 using JustRentItAPI.Models.Entities;
 using JustRentItAPI.Repositories.Interfaces;
 using JustRentItAPI.Services.Interfaces;
+using System;
 using System.Net;
 
 namespace JustRentItAPI.Services.Classes
@@ -11,12 +12,14 @@ namespace JustRentItAPI.Services.Classes
         private readonly IInterestRepository _interestRepository;
         private readonly IMailService _mailService;
         private readonly IMonthlySummaryRepository _monthlySummaryRepository;
+        private readonly string _frontendBaseUrl;
 
-        public MonthlySummaryService( IInterestRepository interestRepository, IMailService mailService ,IMonthlySummaryRepository monthlySummaryRepository)
+        public MonthlySummaryService(IInterestRepository interestRepository, IMailService mailService, IMonthlySummaryRepository monthlySummaryRepository, IConfiguration configuration)
         {
             _interestRepository = interestRepository;
             _mailService = mailService;
             _monthlySummaryRepository = monthlySummaryRepository;
+            _frontendBaseUrl = configuration["FrontendUrl"];
         }
 
         public async Task<Response<MonthlySummaryLastDTO>> GetLastSummaryAsync()
@@ -52,11 +55,16 @@ namespace JustRentItAPI.Services.Classes
             try
             {
                 //מחשבים את החודש הקודם
-                var now = DateTime.UtcNow;
-                int month = now.Month == 1 ? 12 : now.Month - 1;
-                int year = now.Month == 1 ? now.Year - 1 : now.Year;
+                /* var now = DateTime.UtcNow;
+                 int month = now.Month == 1 ? 12 : now.Month - 1;
+                 int year = now.Month == 1 ? now.Year - 1 : now.Year;
 
-                var from = new DateTime(year, month, 1);
+                 var from = new DateTime(year, month, 1);
+                 var to = from.AddMonths(1);*/
+
+                var now = DateTime.UtcNow;
+
+                var from = new DateTime(now.Year, now.Month, 1);
                 var to = from.AddMonths(1);
 
                 List<Interest> interests = await _interestRepository.GetByDateRangeAsync(from, to);
@@ -110,10 +118,11 @@ namespace JustRentItAPI.Services.Classes
 
                 // קיבוץ לפי שמלה -> רשימת מתעניינות
                 var dressData = ownerGroup
-                    .GroupBy(i => i.Dress.Name)
-                    .Select(g =>(
-                         DressName : g.Key,
-                         InterestedNames : g
+                     .GroupBy(i => i.Dress)
+                     .Select(g => (
+                          DressName: g.Key.Name,
+                          DressUrl: $"{_frontendBaseUrl}/dresses/{g.Key.DressID}",
+                          InterestedNames: g
                             .Select(x => $"{x.User.FirstName} {x.User.LastName}")
                             .Distinct()//שלא יופיע שם פעמים
                             .ToList()
@@ -135,13 +144,13 @@ namespace JustRentItAPI.Services.Classes
                 var userName = user.FirstName;
                 var userEmail = user.Email;
 
-                var dressNames = userGroup
-                    .Select(i => i.Dress.Name)
+                var dressData = userGroup
+                    .Select(i => (Name: i.Dress.Name, Url: $"{_frontendBaseUrl}/dresses/{i.Dress.DressID}"))
                     .Distinct()
                     .ToList();
 
-                if (dressNames.Any())
-                    await _mailService.SendUserMonthlySummaryAsync(user.Email, user.FirstName, dressNames);
+                if (dressData.Any())
+                    await _mailService.SendUserMonthlySummaryAsync(user.Email, user.FirstName, dressData);
             }
         }
     }

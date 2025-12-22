@@ -24,9 +24,9 @@ namespace JustRentItAPI.Services.Interfaces
         Task SendOwnerInterestAsync(User owner, User user, Dress dress, string? message);
 
 
-        Task SendOwnerMonthlySummaryAsync(string ownerEmail, string ownerName, List<(string DressName, List<string> InterestedNames)> dressData);
+        Task SendOwnerMonthlySummaryAsync(string ownerEmail, string ownerName, List<(string DressName, string DressUrl, List<string> InterestedNames)> dresses);
 
-        Task SendUserMonthlySummaryAsync(string userEmail, string userName, List<string> dressNames);
+        Task SendUserMonthlySummaryAsync(string userEmail, string userName, List<(string Name, string Url)> dresses);
 
 
         Task<Response> SendPasswordResetEmailAsync(User user, string resetLink);

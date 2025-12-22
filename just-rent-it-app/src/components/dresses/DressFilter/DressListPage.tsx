@@ -18,9 +18,7 @@ import MobileFilterDrawer from "./Mobile/MobileFilterDrawer";
 import DressesHeader from "./Header/DressesHeader";
 import PageAnchorObserver from "@/components/ui/layout/PageAnchorObserver";
 
-const dressesCache: Record<string, DressListDTO[]> = {};
-const totalResultsCache: Record<string, number> = {};
-const maxPriceCache: Record<string, number> = {};
+import { dressesCache, totalResultsCache } from "@/services/dressCache";
 
 export default function DressListPage() {
   const router = useRouter();
@@ -28,7 +26,6 @@ export default function DressListPage() {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [maxPrice, setMaxPrice] = useState(9999999);
 
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 25;
@@ -42,16 +39,10 @@ export default function DressListPage() {
     saleTypeIds: [],
     stateGroupIds: [],
     statusGroupIds: [],
-    priceMin: 0,
-    priceMax: 9999999,
     orderBy: "",
   };
 
-  const initialFilters = parseUrlToFilters(
-    searchParams, 
-    defaultFilters, 
-    maxPrice 
-  );
+  const initialFilters = parseUrlToFilters(searchParams, defaultFilters);
 
   const [filters, setFilters] = useState<DressFilters>(initialFilters);
   const [draftFilters, setDraftFilters] = useState<DressFilters>({
@@ -74,12 +65,6 @@ export default function DressListPage() {
 
     for (const key in raw) {
       const value = raw[key];
-      if (
-        key === "priceGroup" &&
-        f.priceMin === 0 &&
-        (f.priceMax === 9999999 || f.priceMax === maxPrice)
-      )
-        continue;
       if (value !== undefined) params.set(key, value);
     }
 
@@ -91,41 +76,41 @@ export default function DressListPage() {
   };
 
   useEffect(() => {
-  const loadFiltered = async () => {
-    setLoading(true);
-    try {
-      const key = getCacheKey(filters, pageNumber);
+    const loadFiltered = async () => {
+      setLoading(true);
+      try {
+        const key = getCacheKey(filters, pageNumber);
 
-      if (dressesCache[key]) {
-        const cachedItems = dressesCache[key];
-        if (pageNumber === 1) setDresses(cachedItems);
-        else setDresses((prev) => [...prev, ...cachedItems]);
-        setTotalResults(totalResultsCache[key]);
-        setMaxPrice(maxPriceCache[key]);
-      } else {
-        const params = { ...mapFiltersToParams(filters), pageNumber, pageSize };
-        const res = await getFilteredDresses(params);
+        if (dressesCache[key]) {
+          const cachedItems = dressesCache[key];
+          if (pageNumber === 1) setDresses(cachedItems);
+          else setDresses((prev) => [...prev, ...cachedItems]);
+          setTotalResults(totalResultsCache[key]);
+        } else {
+          const params = {
+            ...mapFiltersToParams(filters),
+            pageNumber,
+            pageSize,
+          };
+          const res = await getFilteredDresses(params);
 
-        dressesCache[key] = res.items;
-        totalResultsCache[key] = res.totalCount;
-        maxPriceCache[key] = res.maxPrice;
+          dressesCache[key] = res.items;
+          totalResultsCache[key] = res.totalCount;
 
-        if (pageNumber === 1) setDresses(res.items);
-        else setDresses((prev) => [...prev, ...res.items]);
+          if (pageNumber === 1) setDresses(res.items);
+          else setDresses((prev) => [...prev, ...res.items]);
 
-        setTotalResults(res.totalCount);
-        setMaxPrice(res.maxPrice);
+          setTotalResults(res.totalCount);
+        }
+
+        setInitialLoad(false);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setInitialLoad(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  loadFiltered();
-}, [filters, pageNumber]);
-
+    loadFiltered();
+  }, [filters, pageNumber]);
 
   useEffect(() => {
     if (initialLoad) return;
@@ -158,7 +143,6 @@ export default function DressListPage() {
           draftFilters={draftFilters}
           setDraftFilters={setDraftFilters}
           applyFilters={applyFilters}
-          maxPrice={maxPrice}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -167,7 +151,6 @@ export default function DressListPage() {
               draftFilters={draftFilters}
               setDraftFilters={setDraftFilters}
               applyFilters={applyFilters}
-              maxPrice={maxPrice}
             />
           </div>
 

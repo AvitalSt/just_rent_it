@@ -10,7 +10,6 @@ export default function MobileFilterDrawer({
   draftFilters,
   setDraftFilters,
   applyFilters,
-  maxPrice,
 }: MobileFilterDrawerProps) {
   return (
     <>
@@ -49,7 +48,6 @@ export default function MobileFilterDrawer({
                 applyFilters(v);
                 setMobileOpen(false);
               }}
-              maxPrice={maxPrice}
             />
           </div>
         </div>

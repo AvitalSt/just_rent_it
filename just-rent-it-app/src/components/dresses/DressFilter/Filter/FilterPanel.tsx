@@ -11,9 +11,6 @@ import SaleTypeFilter from "./SaleTypeFilter";
 import StateGroupFilter from "./StateGroupFilter";
 import StatusGroupFilter from "./StatusGroupFilter";
 
-import FilterSelectWithContent from "@/components/ui/filters/FilterSelectWithContent";
-import PriceFilter from "./PriceFilter";
-
 import { FilterPanelProps } from "@/models/types/dress/DressFilter.types";
 import { useAppSelector } from "@/store/hooks";
 
@@ -21,10 +18,10 @@ export default function FilterPanel({
   draftFilters,
   setDraftFilters,
   applyFilters,
-  maxPrice,
 }: FilterPanelProps) {
   const user = useAppSelector((s) => s.user.user);
   const isAdmin = user?.role === 2;
+
 
   const resetFilters = () => {
     const reset = {
@@ -36,11 +33,8 @@ export default function FilterPanel({
       saleTypeIds: [],
       stateGroupIds: [],
       statusGroupIds: [],
-      priceMin: 0,
-      priceMax: maxPrice,
       orderBy: "",
     };
-
     setDraftFilters(reset);
     applyFilters(reset);
   };
@@ -74,33 +68,6 @@ export default function FilterPanel({
           </button>
         </div>
       </div>
-
-      <FilterSelectWithContent
-        title="מחיר"
-        hasValue={
-          draftFilters.priceMin !== 0 || draftFilters.priceMax !== maxPrice
-        }
-        onClear={() =>
-          setDraftFilters((prev) => ({
-            ...prev,
-            priceMin: 0,
-            priceMax: maxPrice,
-          }))
-        }
-      >
-        <PriceFilter
-          min={draftFilters.priceMin}
-          max={draftFilters.priceMax}
-          maxRange={maxPrice}
-          onChange={(v) =>
-            setDraftFilters((prev) => ({
-              ...prev,
-              priceMin: v.min,
-              priceMax: v.max,
-            }))
-          }
-        />
-      </FilterSelectWithContent>
 
       <CityFilter
         value={draftFilters.cityIds}

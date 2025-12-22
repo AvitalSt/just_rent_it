@@ -24,7 +24,6 @@ namespace JustRentItAPI.Controllers
         [FromQuery] string? ageGroup,
         [FromQuery] string? colorGroup,
         [FromQuery] string? sizeGroup,
-        [FromQuery] string? priceGroup,
         [FromQuery] string? stateGroup,
         [FromQuery] string? statusGroup,
         [FromQuery] string? orderBy,
@@ -33,7 +32,7 @@ namespace JustRentItAPI.Controllers
         {
             var response = await _dressService.GetFilteredAsync(
                 city, eventType, saleType, ageGroup,
-                colorGroup, sizeGroup, priceGroup,
+                colorGroup, sizeGroup,
                 stateGroup, statusGroup, orderBy,
                 pageNumber, pageSize);
 

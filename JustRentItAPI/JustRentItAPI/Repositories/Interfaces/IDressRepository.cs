@@ -15,7 +15,6 @@ namespace JustRentItAPI.Repositories.Interfaces
             List<int>? ageGroupIDs = null,
             List<int>? colorIDs = null,
             List<int>? sizeIDs = null,
-            string? priceGroup = null,
             List<DressState>? stateGroup = null,
             List<DressStatus>? statusGroup = null,
             string? orderBy = null,

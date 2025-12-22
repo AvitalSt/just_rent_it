@@ -121,7 +121,6 @@ namespace JustRentItAPI.Services.Classes
                     {
                         Items = dtoItems,
                         TotalCount = result.TotalCount,
-                        maxPrice = 0 // לא רלוונטי כאן אבל השדה קיים במודל
                     }
                 };
             }

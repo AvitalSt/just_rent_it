@@ -42,7 +42,6 @@ namespace JustRentItAPI.Services.Classes
             string? ageGroup = null,
             string? colorGroup = null,
             string? sizeGroup = null,
-            string? priceGroup = null,
             string? stateGroup = null,
             string? statusGroup = null,
             string? orderBy = null,
@@ -66,7 +65,7 @@ namespace JustRentItAPI.Services.Classes
 
                 var result = await _dressRepository.GetFilteredAsync(
            cityIDs, eventTypeIDs, saleTypeEnum, ageGroupIDs,
-           colorIDs, sizeIDs, priceGroup, stateGroupEnum, statusGroupEnum,
+           colorIDs, sizeIDs, stateGroupEnum, statusGroupEnum,
            orderBy, pageNumber, pageSize, isAdmin
        );
 
@@ -83,8 +82,6 @@ namespace JustRentItAPI.Services.Classes
                     {
                         Items = dtoItems,
                         TotalCount = result.TotalCount,
-                        maxPrice = result.maxPrice,
-
                     }
                 };
             }

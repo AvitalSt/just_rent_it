@@ -103,7 +103,6 @@ namespace JustRentItAPI.Repositories.Classes
             {
                 Items = items,
                 TotalCount = totalCount,
-                maxPrice = 0 
             };
         }
 

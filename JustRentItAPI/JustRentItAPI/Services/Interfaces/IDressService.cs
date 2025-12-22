@@ -11,7 +11,6 @@ namespace JustRentItAPI.Services.Interfaces
     string? ageGroup = null,
     string? colorGroup = null,
     string? sizeGroup = null,
-    string? priceGroup = null,
     string? stateGroup = null,
     string? statusGroup = null,
     string? orderBy = null,

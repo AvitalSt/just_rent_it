@@ -5,7 +5,6 @@ export interface DressFilterParams {
   ageGroup?: string;
   colorGroup?: string;
   sizeGroup?: string;
-  priceGroup?: string;    
   stateGroup?: string;    
   statusGroup?: string;   
   orderBy?: string;

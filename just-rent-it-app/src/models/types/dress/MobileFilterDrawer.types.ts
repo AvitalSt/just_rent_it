@@ -6,5 +6,4 @@ export interface MobileFilterDrawerProps {
   draftFilters: DressFilters;
   setDraftFilters: React.Dispatch<React.SetStateAction<DressFilters>>;
   applyFilters: (f?: DressFilters) => void;
-  maxPrice: number;
 }

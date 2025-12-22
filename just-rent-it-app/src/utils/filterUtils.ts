@@ -5,11 +5,8 @@ import { InterestDraftFilters } from "@/models/types/interest/InterestFilterPara
 // ואם הם לא ריקים → מחברת אותם למחרוזת עם _
 // ומחזירה אובייקט עם כל הפרמטרים מוכנים.
 
-export const DEFAULT_MAX_PRICE = 10000;
-
 export function buildFilterParams(
   filters: DressFilters,
-  defaultMaxPrice: number
 ) {
   const params: Record<string, string | undefined> = {};
 
@@ -33,16 +30,6 @@ export function buildFilterParams(
 
   if (filters.statusGroupIds.length)
     params.statusGroup = filters.statusGroupIds.join("_");
-
-const safePriceMin = filters.priceMin || 0;
-const safePriceMax =
-  filters.priceMax && filters.priceMax > 0
-    ? filters.priceMax
-    : defaultMaxPrice && defaultMaxPrice > 0
-      ? defaultMaxPrice
-      : DEFAULT_MAX_PRICE;
-
-params.priceGroup = `${safePriceMin}_${safePriceMax}`;;
 
   if (filters.orderBy) params.orderBy = filters.orderBy;
 

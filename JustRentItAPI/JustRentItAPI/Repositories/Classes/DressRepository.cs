@@ -58,7 +58,6 @@ namespace JustRentItAPI.Repositories.Classes
             List<int>? ageGroupIDs = null,
             List<int>? colorIDs = null,
             List<int>? sizeIDs = null,
-            string? priceGroup = null,
             List<DressState>? stateGroup = null,
             List<DressStatus>? statusGroup = null,
             string? orderBy = null,
@@ -113,19 +112,6 @@ namespace JustRentItAPI.Repositories.Classes
                 query = query.Where(d => statusGroup.Contains(d.Status));
             }
 
-            if (!string.IsNullOrEmpty(priceGroup))
-            {
-                var parts = priceGroup.Split('_');
-
-                if (parts.Length == 2)
-                {
-                    int min = int.Parse(parts[0]);
-                    int max = int.Parse(parts[1]);
-
-                    query = query.Where(d => d.Price >= min && d.Price <= max);
-                }
-            }
-
             switch (orderBy?.ToLower())
             {
                 case "price_asc":
@@ -145,9 +131,6 @@ namespace JustRentItAPI.Repositories.Classes
             pageNumber = Math.Max(1, pageNumber);
             pageSize = Math.Clamp(pageSize, 1, 50);
 
-            var maxPrice = await query.AnyAsync()
-                ? await query.MaxAsync(d => d.Price)
-                : 0;
             var totalCount = await query.CountAsync();
 
             var dresses = await query
@@ -159,7 +142,6 @@ namespace JustRentItAPI.Repositories.Classes
             {
                 Items = dresses,
                 TotalCount = totalCount,
-                maxPrice = maxPrice
             };
         }
 

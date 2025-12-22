@@ -27,9 +27,11 @@ import InfiniteScrollContainer from "@/components/ui/layout/InfiniteScrollContai
 import { useRouter } from "next/navigation";
 import PageAnchorObserver from "@/components/ui/layout/PageAnchorObserver";
 import { useAppSelector } from "@/store/hooks";
-
-let interestsCache: Record<string, InterestListDTO[]> = {};
-let totalCountCache: Record<string, number> = {};
+import {
+  interestsCache,
+  totalCountCache,
+  clearInterestsCache,
+} from "@/services/interestCache";
 
 export default function AdminInterestPage() {
   const router = useRouter();
@@ -162,7 +164,9 @@ export default function AdminInterestPage() {
       if (field === "ownerComment") await updateOwnerComment(id, value);
       if (field === "userComment") await updateUserComment(id, value);
       if (field === "paymentAmount") await updatePaymentAmount(id, value);
-      load();
+      clearInterestsCache();
+      setPageNumber(1);
+      await load();
     } catch {
       alert("שמירה נכשלה");
     }

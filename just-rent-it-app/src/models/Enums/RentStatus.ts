@@ -1,6 +1,6 @@
 export enum RentStatus {
-  Pending = 0,
-  Confirmed = 1,
-  Cancelled = 2,
-  Paid = 3,
+  Pending = 1,
+  Confirmed = 2,
+  Cancelled = 3,
+  Paid = 4,
 }

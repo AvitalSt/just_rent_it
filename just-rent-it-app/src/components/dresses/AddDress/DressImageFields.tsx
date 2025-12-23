@@ -1,7 +1,6 @@
 "use client";
 
 import ImageUpload from "@/components/ui/ImageUpload";
-import { AddDressDTO } from "@/models/DTOs/AddDressDTO";
 import { DressImageFieldsProps } from "@/models/types/dress/DressImageFields.types";
 
 export default function DressImageFields({

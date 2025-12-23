@@ -22,6 +22,7 @@ import { sendInterest } from "@/services/interestService";
 import { Button } from "@/components/ui/Button";
 import { DressViewProps } from "@/models/types/dress/DressView.types";
 import axios from "axios";
+import { clearDressesCache } from "@/services/dressCache";
 
 export default function DressView({ dress, reload }: DressViewProps) {
   const API_BASE_ORIGIN = process.env.NEXT_PUBLIC_API_BASE_ORIGIN;
@@ -107,6 +108,7 @@ export default function DressView({ dress, reload }: DressViewProps) {
     setLoadingActivate(true);
     try {
       await activateDress(dress.dressID);
+      clearDressesCache();
       reload();
       setModal({ text: "הסטטוס עודכן." });
     } catch {
@@ -121,6 +123,7 @@ export default function DressView({ dress, reload }: DressViewProps) {
     setLoadingDelete(true);
     try {
       await deleteDress(dress.dressID);
+      clearDressesCache();
       router.push("/dresses");
     } catch {
       setModal({ text: "שגיאה במחיקה." });

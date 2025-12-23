@@ -48,7 +48,6 @@ export function useDressEdit(
   );
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreview, setNewPreview] = useState<string[]>([]);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
     //מקבלת רשימת אובייקטים ורשימת מחרוזות ואז עושה filter מסננת רק את האויקיבטים שרושמים בשמלה ו-map מחזירה רק את הID שלהם
@@ -174,8 +173,6 @@ export function useDressEdit(
     newPreview,
     newFiles,
     onAddImages,
-    previewImage,
-    setPreviewImage,
     setNewPreview,
     setNewFiles,
     handleSave,

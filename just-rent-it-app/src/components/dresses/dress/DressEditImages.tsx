@@ -1,7 +1,9 @@
 "use client";
 
+import ImageModal from "@/components/ui/ImageModal";
 import { DressEditImagesProps } from "@/models/types/dress/DressEditImages.types";
 import { X } from "lucide-react";
+import { useState } from "react";
 
 export default function DressEditImages({
   dress,
@@ -11,11 +13,18 @@ export default function DressEditImages({
   handleSetMain,
   newPreview,
   onAddImages,
-  setPreviewImage,
   setNewPreview,
   setNewFiles,
 }: DressEditImagesProps) {
   const API_BASE_ORIGIN = process.env.NEXT_PUBLIC_API_BASE_ORIGIN;
+
+  const [modalIndex, setModalIndex] = useState<number | null>(null);
+  const allImages = [
+    ...dress.images
+      .filter((img) => !removeImages.includes(img.imageID))
+      .map((img) => `${API_BASE_ORIGIN}${img.imagePath}`),
+    ...newPreview,
+  ];
 
   return (
     <div className="space-y-6">
@@ -38,7 +47,7 @@ export default function DressEditImages({
                 <img
                   src={full}
                   className="w-full h-32 object-cover rounded cursor-pointer"
-                  onClick={() => setPreviewImage(full)}
+                  onClick={() => setModalIndex(allImages.indexOf(full))}
                 />
 
                 <button
@@ -72,8 +81,8 @@ export default function DressEditImages({
           <div key={i} className="relative border rounded p-2">
             <button
               onClick={() => {
-                setNewPreview((prev) => prev.filter((_, index ) => index  !== i));
-                setNewFiles((prev) => prev.filter((_, index ) => index  !== i));
+                setNewPreview((prev) => prev.filter((_, index) => index !== i));
+                setNewFiles((prev) => prev.filter((_, index) => index !== i));
               }}
               className="absolute top-1 right-1 text-white p-1 rounded-full shadow-md hover:bg-black"
             >
@@ -82,7 +91,7 @@ export default function DressEditImages({
             <img
               src={src}
               className="w-full h-32 object-cover rounded cursor-pointer"
-              onClick={() => setPreviewImage(src)}
+              onClick={() => setModalIndex(allImages.indexOf(src))}
             />
 
             <button
@@ -98,6 +107,14 @@ export default function DressEditImages({
           </div>
         ))}
       </div>
+      {modalIndex !== null && (
+  <ImageModal
+    images={allImages}
+    startIndex={modalIndex}
+    onClose={() => setModalIndex(null)}
+  />
+)}
+
     </div>
   );
 }

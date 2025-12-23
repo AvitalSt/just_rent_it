@@ -1,8 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { X, Check } from "lucide-react";
 import { ImageUploadProps } from "@/models/types/ui/ImageUpload.types";
+import ImageModal from "./ImageModal";
 
 export default function ImageUpload({
   previews,
@@ -15,6 +16,7 @@ export default function ImageUpload({
   required = false,
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [modalIndex, setModalIndex] = useState<number | null>(null);
 
   const pickFiles = () => inputRef.current?.click();
 
@@ -87,7 +89,11 @@ export default function ImageUpload({
                   : "bg-white text-black hover:bg-gray-200"
               }`}
             >
-              <img src={src} className="w-full h-full object-cover" />
+              <img
+                src={src}
+                className="w-full h-full object-cover cursor-pointer"
+                onClick={() => setModalIndex(idx)}
+              />
 
               <button
                 type="button"
@@ -122,6 +128,14 @@ export default function ImageUpload({
         className="hidden"
         onChange={(e) => handleFiles(e.target.files)}
       />
+
+      {modalIndex !== null && (
+        <ImageModal
+          images={previews}
+          startIndex={modalIndex}
+          onClose={() => setModalIndex(null)}
+        />
+      )}
     </div>
   );
 }

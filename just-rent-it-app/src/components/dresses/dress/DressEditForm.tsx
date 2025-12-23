@@ -37,8 +37,6 @@ export default function DressEditForm({
     handleSetMain,
     newPreview,
     onAddImages,
-    previewImage,
-    setPreviewImage,
     setNewPreview,
     setNewFiles,
     handleSave,
@@ -110,31 +108,11 @@ export default function DressEditForm({
             handleSetMain={handleSetMain}
             newPreview={newPreview}
             onAddImages={onAddImages}
-            setPreviewImage={setPreviewImage}
             setNewPreview={setNewPreview}
             setNewFiles={setNewFiles}
           />
         </div>
-
-        {previewImage && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-            onClick={() => setPreviewImage(null)}
-          >
-            <img
-              src={previewImage}
-              className="max-h-[90vh] max-w-[90vw] rounded shadow-lg"
-              onClick={(e) => e.stopPropagation()}
-            />
-            <button
-              className="absolute top-6 right-6 text-white bg-black bg-opacity-40 p-3 rounded-full"
-              onClick={() => setPreviewImage(null)}
-            >
-              X
-            </button>
-          </div>
-        )}
-
+        
         <div className="bg-gray-50 p-6 rounded-lg space-y-4">
           <ColorFilter
             value={form.ColorIDs}

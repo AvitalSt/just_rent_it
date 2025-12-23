@@ -9,7 +9,6 @@ export interface DressEditImagesProps {
   handleSetMain: (img: DressImageDTO | string) => void;
   newPreview: string[];
   onAddImages: (files: FileList | null) => void;
-  setPreviewImage: (src: string | null) => void;
   setNewPreview: (value: string[] | ((prev: string[]) => string[])) => void;
   setNewFiles: (value: File[] | ((prev: File[]) => File[])) => void;
 }

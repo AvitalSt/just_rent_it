@@ -335,7 +335,8 @@ namespace JustRentItAPI.Services.Classes
                     interest.Dress.User.Email,
                     interest.Dress.User.FirstName,
                     interest.User.FirstName,
-                    interest.Dress.Name
+                    interest.Dress.Name,
+                    interest.Dress.DressID
                 );
 
                 interest.OwnerMailCount++;
@@ -377,7 +378,8 @@ namespace JustRentItAPI.Services.Classes
                 await _mailService.SendUserFollowUpAsync(
                     interest.User.Email,
                     interest.User.FirstName,
-                    interest.Dress.Name
+                    interest.Dress.Name,
+                    interest.Dress.DressID
                 );
 
                 interest.UserMailCount++;

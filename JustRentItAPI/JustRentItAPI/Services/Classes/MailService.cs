@@ -15,6 +15,7 @@ namespace JustRentItAPI.Services.Classes
         private readonly string _smtpPassword;
         private readonly string _fromEmail;
 
+        private readonly string _baseUrl;
 
         public MailService(IConfiguration config)
         {
@@ -23,6 +24,8 @@ namespace JustRentItAPI.Services.Classes
             _smtpUser = config["MailSettings:User"];
             _smtpPassword = config["MailSettings:Password"];
             _fromEmail = config["MailSettings:From"];
+
+            _baseUrl = config["FrontendUrl"];
         }
 
         public async Task<Response> SendEmailAsync(string toEmail, string subject, string body)
@@ -73,11 +76,11 @@ namespace JustRentItAPI.Services.Classes
             string body = $@"
                             <div style='font-family: Heebo, Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7;'>
 
-                            שלום {dress.User.FirstName},<br><br>
+                            שלום {dress.User.FirstName},<br/>
 
-                            רצינו לעדכן שהשמלה שלך <strong>""{dress.Name}""</strong> נמחקה מהמערכת.<br><br>
+                            רצינו לעדכן שהשמלה שלך <strong>""{dress.Name}""</strong> נמחקה מהמערכת.<br/>
 
-                            אם מדובר בטעות, או במידה שתרצי להחזיר אותה - אפשר ליצור איתנו קשר בכל זמן.<br><br>
+                            אם מדובר בטעות, או במידה שתרצי להחזיר אותה - אפשר ליצור איתנו קשר בכל זמן.<br/>
 
                             בברכה,<br>
                             <strong>Just Rent It</strong>
@@ -91,7 +94,7 @@ namespace JustRentItAPI.Services.Classes
             );
         }
 
-        public async Task SendDressActivatedAsync(Dress dress, string baseUrl)
+        public async Task SendDressActivatedAsync(Dress dress)
         {
             if (dress.User == null || string.IsNullOrWhiteSpace(dress.User.Email))
                 return;
@@ -99,20 +102,20 @@ namespace JustRentItAPI.Services.Classes
             string body = $@"
                             <div style='font-family: Heebo, Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7;'>
 
-                            שלום {dress.User.FirstName},<br><br>
+                            שלום {dress.User.FirstName},<br/>
 
-                            שמחים לעדכן שהשמלה שלך <strong>""{dress.Name}""</strong> אושרה כעת והועלתה לאתר! 🎉<br><br>
+                            שמחים לעדכן שהשמלה שלך <strong>""{dress.Name}""</strong> אושרה כעת והועלתה לאתר! 🎉<br/>
 
                             היא זמינה כעת לצפייה על ידי כל משתמשי האתר.<br>
-                            במידה ומשתמש יתעניין בשמלה שלך - תקבלי על כך עדכון ישירות למייל.<br><br>
+                            במידה ומשתמש יתעניין בשמלה שלך - תקבלי על כך עדכון ישירות למייל.<br/>
 
                             תוכלי לראות את השמלה בלינק:<br>
-                            <a href='{baseUrl}dresses/{dress.DressID}' style='color:#000; font-weight:bold;'>לחצי כאן לצפייה בשמלה</a><br><br>
+                            <a href='{_baseUrl}dresses/{dress.DressID}' style='color:#000; font-weight:bold;'>לחצי כאן לצפייה בשמלה</a><br/>
 
-                            אם יש שינוי שתרצי לבצע בשמלה (מחיר, תמונות, פרטים) - ניתן לערוך אותה בכל זמן.<br><br>
+                            אם יש שינוי שתרצי לבצע בשמלה (מחיר, תמונות, פרטים) - ניתן לערוך אותה בכל זמן.<br/>
 
                             <strong>חשוב לדעת:</strong><br>
-                            במקרה של השכרה או קנייה דרך האתר, ישנה עמלה של <strong>15%</strong> ממחיר העסקה.<br><br>
+                            במקרה של השכרה או קנייה דרך האתר, ישנה עמלה של <strong>15%</strong> ממחיר העסקה.<br/>
 
                             בברכה,<br>
                             <strong>Just Rent It</strong>
@@ -127,51 +130,61 @@ namespace JustRentItAPI.Services.Classes
         }
 
 
-        public async Task SendOwnerFollowUpAsync(string ownerEmail, string ownerName, string interestedName, string dressName)
+        public async Task SendOwnerFollowUpAsync(string ownerEmail, string ownerName, string interestedName, string dressName, int dressId)
         {
             var subject = $"עדכון לגבי השמלה \"{dressName}\" באתר JustRentIt";
+
+            var dressUrl = $"{_baseUrl}dresses/{dressId}";
 
             var body = $@"
                         <div style='direction: rtl; text-align: right; font-family: Arial, sans-serif; font-size: 15px;'>
 
-                            <p>נשמח לקבל עדכון לגבי השמלה שלך באתר JustRentIt</p>
-
-                            <p>שלום {ownerName},</p>
-
-                            <p>
-                                שמנו לב ש{interestedName} התעניינה בשמלה שלך באתר.<br/>
-                                כחלק משיתוף הפעולה, נשמח לדעת האם חל עדכון לגבי מצב השמלה - האם הושכרה או נמכרה?
-                            </p>
-
-                            <p>
-                                תודה מראש,<br/>
-                                צוות JustRentIt
-                            </p>
+                            <br/>
+                            שלום {ownerName},
+                            <br/>
+                            <br/>
+                            שמנו לב ש{interestedName} התעניינה בשמלה שלך באתר.<br/>
+                            <br/>
+                            <a href='{dressUrl}' target='_blank' style='color:#6b4eff;'>
+                                {dressName}
+                            </a>
+                            <br/><br/>
+                            כחלק משיתוף הפעולה, נשמח לדעת האם חל עדכון לגבי מצב השמלה - האם הושכרה או נמכרה?
+                            <br/>
+                            <br/>
+                            תודה מראש,<br/>
+                            צוות JustRentIt
 
                         </div>";
 
             await SendEmailAsync(ownerEmail, subject, body);
         }
 
-        public async Task SendUserFollowUpAsync(string userEmail, string userName, string dressName)
+        public async Task SendUserFollowUpAsync(string userEmail, string userName, string dressName, int dressId)
         {
             var subject = "שמלה שהתעניינת בה באתר JUST-RENT-IT";
+
+            var dressUrl = $"{_baseUrl}dresses/{dressId}";
 
             var body = $@"
                         <div style='direction: rtl; text-align: right; font-family: Arial, sans-serif; font-size: 15px;'>
 
-                            <p>שלום {userName},</p>
-
-                            <p>
+                            שלום {userName},
+                            <br/>
+                            <br/>
                             ראינו שהתעניינת בשמלה ""{dressName}"" באתר שלנו.<br/>
+                            
+                            <a href='{dressUrl}' target='_blank' style='color:#6b4eff;'>
+                                {dressName}
+                            </a>
+                            <br/>
+                            <br/>
                             נשמח לשמוע אם יצא לך להשכיר או לקנות שמלה דרך האתר,<br/>
                             ולדעת איך הייתה לך החוויה באתר שלנו :)
-                            </p>
-
-                            <p>
+                            <br/>
+                            <br/>
                             תודה רבה,<br/>
                             צוות JustRentIt
-                            </p>
 
                         </div>";
 
@@ -183,22 +196,29 @@ namespace JustRentItAPI.Services.Classes
             if (string.IsNullOrWhiteSpace(user.Email))
                 return;
 
+            var dressUrl = $"{_baseUrl}dresses/{dress.DressID}";
+
             string body = $@"
                             <div style='font-family: Heebo, Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7;'>
 
-                            שלום {user.FirstName},<br><br>
+                            שלום {user.FirstName},<br/>
 
-                            תודה על ההתעניינות בשמלה {dress.Name} ✨<br><br>
-
+                            תודה על ההתעניינות בשמלה {dress.Name} ✨
+                            <br/>
+                            <a href='{dressUrl}' target='_blank' style='color:#6b4eff;'>
+                                {dress.Name}
+                            </a>
+                            <br/>
+                            <br/>
                             <strong>פרטי הקשר של בעלת השמלה:</strong><br>
                             • שם: {owner.FirstName} {owner.LastName}<br>
                             • אימייל: {owner.Email}<br>
-                            • טלפון: {owner.Phone}<br><br>
+                            • טלפון: {owner.Phone}<br/>
 
-                            <strong>בבקשה, כשאת יוצרת קשר עם בעלת השמלה צייני שהגעת דרך האתר JUST-RENT-IT</strong>.<br><br>
+                            <strong>בבקשה, כשאת יוצרת קשר עם בעלת השמלה צייני שהגעת דרך האתר JUST-RENT-IT</strong>.<br/>
 
                             נשמח לשמוע ולהתעדכן מה קורה עם השמלה אהבת? השכרת? ספרי לנו! <br>
-                            אם משהו לא ברור או שיש לך שאלה, אני כאן לכל דבר.<br><br>
+                            אם משהו לא ברור או שיש לך שאלה, אני כאן לכל דבר.<br/>
 
                             בברכה,<br>
                             <strong>Just Rent It dress</strong>
@@ -217,28 +237,35 @@ namespace JustRentItAPI.Services.Classes
             if (string.IsNullOrWhiteSpace(owner.Email))
                 return;
 
+            var dressUrl = $"{_baseUrl}dresses/{dress.DressID}";
+
             string body = $@"
                             <div style='font-family: Heebo, Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7;'>
 
-                            שלום {owner.FirstName},<br><br>
+                            שלום {owner.FirstName},<br/>
 
-                            רצינו לעדכן אותך ש־{user.FirstName} {user.LastName} התעניינה בשמלה שלך ""{dress.Name}"" וצפויה ליצור איתך קשר בהמשך.<br><br>
+                            רצינו לעדכן אותך ש־{user.FirstName} {user.LastName} התעניינה בשמלה שלך ""{dress.Name}"" וצפויה ליצור איתך קשר בהמשך.<br/>
 
+                            <a href='{dressUrl}' target='_blank' style='color:#6b4eff;'>
+                                {dress.Name}
+                            </a>
+                            <br/>
+                            <br/>
                             <strong>פרטי המתעניינת:</strong><br>
                             • שם: {user.FirstName} {user.LastName}<br>
                             • אימייל: {user.Email}<br>
                             • טלפון: {user.Phone}<br>
                             {(string.IsNullOrWhiteSpace(message) ? "" : $"• הודעה שצירפה: {message}<br>")}<br>
 
-                            נשמח שתעדכני אותנו מה קורה בהמשך האם יצרתן קשר? האם השמלה הושכרה?<br><br>
+                            נשמח שתעדכני אותנו מה קורה בהמשך האם יצרתן קשר? האם השמלה הושכרה?<br/>
 
                             במידה ולא נקבל עדכון מצידך, תישלח אלייך תזכורת אוטומטית.<br>
-                            אם לא יתקבל עדכון גם לאחר התזכורת, השמלה עשויה לרדת מהאתר באופן זמני עד לקבלת מידע נוסף.<br><br>
+                            אם לא יתקבל עדכון גם לאחר התזכורת, השמלה עשויה לרדת מהאתר באופן זמני עד לקבלת מידע נוסף.<br/>
 
                             <strong>חשוב לדעת:</strong><br>
-                            במקרה של השכרה דרך האתר, תחול עמלה של 15% ממחיר ההשכרה, אותה יש להעביר בהעברה בנקאית. פרטי החשבון יימסרו במקרה של השכרה.<br><br>
+                            במקרה של השכרה דרך האתר, תחול עמלה של 15% ממחיר ההשכרה, אותה יש להעביר בהעברה בנקאית. פרטי החשבון יימסרו במקרה של השכרה.<br/>
 
-                            לכל שאלה או צורך בעזרה אנחנו כאן בשבילך.<br><br>
+                            לכל שאלה או צורך בעזרה אנחנו כאן בשבילך.<br/>
 
                             בברכה,<br>
                             <strong>Just Rent It dress</strong>
@@ -262,15 +289,16 @@ namespace JustRentItAPI.Services.Classes
             string body = $@"
                             <div style='direction: rtl; text-align: right; font-family: Arial, sans-serif; font-size: 15px;'>
 
-                                <p>שלום {ownerName},</p>
+                               שלום {ownerName},
+                               <br/>
+                               <br/>
 
-                                <p>איזה כיף! מישהי השכירה את השמלה שלך דרך האתר שלנו JustRentIt! ✨</p>
-
+                              איזה כיף! מישהי השכירה את השמלה שלך דרך האתר שלנו JustRentIt! ✨
+                               <br/>                           
+                                בהתאם לתנאי השימוש,  <br/>יש לבצע העברה של 15% ממחיר ההשכרה או ממחיר הקנייה.
+                               <br/>
                                 <p>
-                                בהתאם לתנאי השימוש, יש לבצע העברה של 15% ממחיר ההשכרה או ממחיר הקנייה.
-                                </p>
-
-                                <p><b>פרטי הבנק להעברה:</b><br/>
+                                <b>פרטי הבנק להעברה:</b><br/>
                                 בנק מזרחי סניף 430<br/>
                                 מספר חשבון: 446904<br/>
                                 על שם: אביטל גולדרינג
@@ -279,16 +307,13 @@ namespace JustRentItAPI.Services.Classes
                                 058-3130909
                                 </p>
 
-                                <p>
                                 נשמח לקבל צילום מסך לאישור העברה.<br/>
+                               <br/>
                                 אם יש שאלות או משהו לא ברור, ניתן לפנות אלינו בכתובת:<br/>
                                 just.rent.it1@gmail.com
-                                </p>
-
-                                <p>
+                               <br/>
                                 בברכה,<br/>
                                 צוות JustRentIt
-                                </p>
 
                             </div>";
 
@@ -307,7 +332,7 @@ namespace JustRentItAPI.Services.Classes
             );
         }
 
-        public async Task SendUserMonthlySummaryAsync( string userEmail,string userName, List<(string Name, string Url)> dresses)
+        public async Task SendUserMonthlySummaryAsync(string userEmail, string userName, List<(string Name, string Url)> dresses)
         {
             if (dresses == null || dresses.Count == 0)
                 return;
@@ -336,25 +361,23 @@ namespace JustRentItAPI.Services.Classes
             return $@"
                     <div dir='rtl' style='font-family: Arial; font-size: 16px; line-height: 1.8;'>
 
-                        <p>שלום {ownerName},</p>
+                        שלום {ownerName},
+                        <br/>
+                        <br/>
 
-                        <p>
-                            ראינו שהחודש היו התעניינויות חדשות בשמלות שלך ✨<br/>
-                            וריכזנו לך כאן את כולן במקום אחד:
-                        </p>
+                        ראינו שהחודש היו התעניינויות חדשות בשמלות שלך ✨<br/>
+                        וריכזנו לך כאן את כולן במקום אחד:
+                        <br/>
+                        <br/>
 
-                        <p>
-                            {listHtml}
-                        </p>
-
-                        <p>
-                            נשמח אם תעדכני אותנו אם מישהי יצרה איתך קשר ואם משהו התקדם.<br/>
-                            תודה רבה על שיתוף הפעולה!
-                        </p>
-
-                        <p>
-                            צוות JustRentIt
-                        </p>
+                        {listHtml}
+                        <br/>
+                        <br/>
+                        נשמח אם תעדכני אותנו אם מישהי יצרה איתך קשר ואם משהו התקדם.<br/>
+                        תודה רבה על שיתוף הפעולה!
+                        <br/>
+                        <br/>
+                        צוות JustRentIt
 
                     </div>";
         }
@@ -366,26 +389,25 @@ namespace JustRentItAPI.Services.Classes
             return $@"
                     <div dir='rtl' style='font-family: Arial; font-size: 16px; line-height: 1.6;'>
 
-                        <p>שלום {userName},</p>
+                        שלום {userName},
+                        <br/>
+                        <br/>
 
-                        <p>
-                            ראינו שהחודש התעניינת בכמה שמלות דרך האתר שלנו ✨<br/>
-                            וריכזנו לך כאן את כולן:
-                        </p>
+                        ראינו שהחודש התעניינת בכמה שמלות דרך האתר שלנו ✨<br/>
+                        וריכזנו לך כאן את כולן:
+                        <br/>
+                        <br/>
 
-                        <p>
-                            {listHtml}
-                        </p>
+                        {listHtml}
+                        <br/>
+                        <br/>
+                        נשמח לשמוע אם יצא לך לשכור או לקנות אחת מהשמלות דרך האתר,<br/>
+                        ולשמוע איך הייתה לך החוויה אצלנו :)
+                        <br/>
+                        <br/>
 
-                        <p>
-                            נשמח לשמוע אם יצא לך לשכור או לקנות אחת מהשמלות דרך האתר,<br/>
-                            ולשמוע איך הייתה לך החוויה אצלנו :)
-                        </p>
-
-                        <p>
-                            תודה רבה,<br/>
-                            צוות JustRentIt
-                        </p>
+                        תודה רבה,<br/>
+                        צוות JustRentIt
 
                     </div>";
         }

@@ -279,7 +279,7 @@ namespace JustRentItAPI.Services.Classes
 
                 dress.Status = DressStatus.Active;
                 await _dressRepository.UpdateAsync(dress);
-                await _mailService.SendDressActivatedAsync(dress, _baseUrl);
+                await _mailService.SendDressActivatedAsync(dress);
 
                 var userFavoriteDressIds = await UserHelper.GetUserFavoriteDressIdsAsync(_httpContextAccessor, _favoriteRepository);
                 var dressDto = DressMapper.MapToDetailedDTO(dress, userFavoriteDressIds);

@@ -9,13 +9,13 @@ namespace JustRentItAPI.Services.Interfaces
 
         Task SendDressDeletedAsync(Dress dress);
 
-        Task SendDressActivatedAsync(Dress dress, string baseUrl);
+        Task SendDressActivatedAsync(Dress dress);
 
 
 
-        Task SendOwnerFollowUpAsync(string ownerEmail, string ownerName, string interestedName,string dressName);
+        Task SendOwnerFollowUpAsync(string ownerEmail, string ownerName, string interestedName,string dressName, int dressId);
 
-        Task SendUserFollowUpAsync(string userEmail, string userName, string dressName);
+        Task SendUserFollowUpAsync(string userEmail, string userName, string dressName, int dressId);
 
         Task SendPaymentAsync(string ownerEmail, string ownerName);
 

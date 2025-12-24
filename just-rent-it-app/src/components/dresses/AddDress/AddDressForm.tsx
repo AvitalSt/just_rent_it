@@ -57,10 +57,12 @@ export default function AddDressForm() {
   const user = useAppSelector((state) => state.user.user);
   const isLoggedIn = !!user;
 
-  useEffect(() => {
-    if (user === undefined) return;
-    if (!user) setShowAuthModal(true);
-  }, [user]);
+useEffect(() => {
+  if (!user) {
+    setShowAuthModal(true);
+  }
+}, [user]);
+
 
   const handleChange = <K extends keyof AddDressDTO>(
     key: K,

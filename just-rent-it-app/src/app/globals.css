@@ -99,3 +99,15 @@ select {
   background-repeat: no-repeat;
   background-position: left 12px center;
 }
+
+
+div.uwy.userway_buttons_wrapper .userway_p4 {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#userwayAccessibilityIcon:focus,
+#userwayAccessibilityIcon:active {
+    outline: none !important;
+    box-shadow: none !important;
+}

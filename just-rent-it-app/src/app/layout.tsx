@@ -7,6 +7,7 @@ import { InitializeOptions } from "@/store/InitializeOptions";
 import Header from "@/components/header/Header";
 import Footer from "@/components/Footer/Footer";
 import { Heebo } from "next/font/google";
+import Script from "next/script";
 
 const heebo = Heebo({
   subsets: ["hebrew", "latin"],
@@ -39,6 +40,18 @@ export default function RootLayout({
             </AppWrapper>
           </ProviderWrapper>
         </GoogleOAuthProvider>
+
+        {process.env.NEXT_PUBLIC_USERWAY_SRC &&
+          process.env.NEXT_PUBLIC_USERWAY_ACCOUNT && (
+            <Script
+              id="userway-accessibility"
+              src={process.env.NEXT_PUBLIC_USERWAY_SRC}
+              data-account={process.env.NEXT_PUBLIC_USERWAY_ACCOUNT}
+              data-position="5"
+              data-color="#000000"
+              strategy="afterInteractive"
+            />
+          )}
       </body>
     </html>
   );

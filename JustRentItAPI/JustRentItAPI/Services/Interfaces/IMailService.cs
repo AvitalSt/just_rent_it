@@ -5,12 +5,11 @@ namespace JustRentItAPI.Services.Interfaces
 {
     public interface IMailService
     {
-        Task<Response> SendEmailAsync(string toEmail, string subject, string body);
+        Task<Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null);
 
         Task SendDressDeletedAsync(Dress dress);
 
         Task SendDressActivatedAsync(Dress dress);
-
 
 
         Task SendOwnerFollowUpAsync(string ownerEmail, string ownerName, string interestedName,string dressName, int dressId);

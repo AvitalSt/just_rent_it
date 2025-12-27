@@ -1,19 +1,28 @@
 ﻿using JustRentItAPI.Services.Interfaces;
-using System.Net.Mail;
 using System.Net;
 using JustRentItAPI.Models.DTOs;
 using JustRentItAPI.Models.Entities;
+using MailKit.Security;
+using MimeKit;
+using MailKit.Net.Smtp;
+using MailKit;
+using MailKit.Net.Imap;
 
 namespace JustRentItAPI.Services.Classes
 {
-    public class MailService : IMailService
+    public class MailService : JustRentItAPI.Services.Interfaces.IMailService
     {
-
         private readonly string _smtpHost;//שרת שדרכו נשלחות המייל
         private readonly int _smtpPort;//הפורט המתאים
-        private readonly string _smtpUser;
+
+        private readonly string _imapHost;
         private readonly string _smtpPassword;
-        private readonly string _fromEmail;
+
+        private readonly string _smtpUser;
+        private readonly int _imapPort;
+
+        private readonly string _smtpNoReply;
+        private readonly string _smtpPasswordNoReply;
 
         private readonly string _baseUrl;
 
@@ -21,39 +30,61 @@ namespace JustRentItAPI.Services.Classes
         {
             _smtpHost = config["MailSettings:Host"];
             _smtpPort = int.Parse(config["MailSettings:Port"]);
+
+            _imapHost = config["MailSettings:ImapHost"];
+            _imapPort = int.Parse(config["MailSettings:ImapPort"]);
+
             _smtpUser = config["MailSettings:User"];
             _smtpPassword = config["MailSettings:Password"];
-            _fromEmail = config["MailSettings:From"];
+
+            _smtpNoReply = config["MailSettings:No-Reply"];
+            _smtpPasswordNoReply = config["MailSettings:PasswordNo-Reply"];
 
             _baseUrl = config["FrontendUrl"];
         }
 
-        public async Task<Response> SendEmailAsync(string toEmail, string subject, string body)
+
+        public async Task<Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null)
         {
+            var senderEmail = fromEmail ?? _smtpUser;
+            var senderPassword = (senderEmail == _smtpNoReply) ? _smtpPasswordNoReply : _smtpPassword;
+
+            var message = new MimeMessage
+            {
+                Subject = subject,
+                Body = new TextPart("html") { Text = body }
+            };
+
+            message.From.Add(new MailboxAddress("Just Rent It", senderEmail));
+            message.To.Add(MailboxAddress.Parse(toEmail));
+
             try
             {
-
-                using var client = new SmtpClient(_smtpHost, _smtpPort)
+                // 1. SMTP - שליחת המייל
+                using (var smtpClient = new SmtpClient())
                 {
-                    Credentials = new NetworkCredential(_smtpUser, _smtpPassword),
-                    EnableSsl = true//קונקשן מאובטח
-                };
+                    await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.StartTls);
+                    await smtpClient.AuthenticateAsync(senderEmail, senderPassword);
+                    await smtpClient.SendAsync(message);
+                    await smtpClient.DisconnectAsync(true);
+                }
 
-                var mailMessage = new MailMessage
+                using (var imapClient = new ImapClient())
                 {
-                    From = new MailAddress(_fromEmail),
-                    Subject = subject,
-                    Body = body,
-                    IsBodyHtml = true
-                };
+                    await imapClient.ConnectAsync(_imapHost, _imapPort, true);
+                    await imapClient.AuthenticateAsync(senderEmail, senderPassword);
 
-                mailMessage.To.Add(toEmail);
+                    var sentFolder = imapClient.GetFolder(SpecialFolder.Sent);
+                    await sentFolder.OpenAsync(FolderAccess.ReadWrite);
+                    await sentFolder.AppendAsync(message, MessageFlags.Seen);
 
-                await client.SendMailAsync(mailMessage);
+                    await imapClient.DisconnectAsync(true);
+                }
+
                 return new Response
                 {
                     IsSuccess = true,
-                    Message = "Email sent successfully",
+                    Message = "Email sent and saved successfully",
                     StatusCode = HttpStatusCode.OK
                 };
             }
@@ -62,7 +93,7 @@ namespace JustRentItAPI.Services.Classes
                 return new Response
                 {
                     IsSuccess = false,
-                    Message = $"Failed to send email: {ex.Message}",
+                    Message = ex.Message,
                     StatusCode = HttpStatusCode.InternalServerError
                 };
             }
@@ -103,20 +134,21 @@ namespace JustRentItAPI.Services.Classes
                             <div style='font-family: Heebo, Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7;'>
 
                             שלום {dress.User.FirstName},<br/>
+<br/>
 
                             שמחים לעדכן שהשמלה שלך <strong>""{dress.Name}""</strong> אושרה כעת והועלתה לאתר! 🎉<br/>
-
+<br/>
                             היא זמינה כעת לצפייה על ידי כל משתמשי האתר.<br>
                             במידה ומשתמש יתעניין בשמלה שלך - תקבלי על כך עדכון ישירות למייל.<br/>
-
+<br/>
                             תוכלי לראות את השמלה בלינק:<br>
                             <a href='{_baseUrl}dresses/{dress.DressID}' style='color:#000; font-weight:bold;'>לחצי כאן לצפייה בשמלה</a><br/>
-
+<br/>
                             אם יש שינוי שתרצי לבצע בשמלה (מחיר, תמונות, פרטים) - ניתן לערוך אותה בכל זמן.<br/>
-
+<br/>
                             <strong>חשוב לדעת:</strong><br>
                             במקרה של השכרה או קנייה דרך האתר, ישנה עמלה של <strong>15%</strong> ממחיר העסקה.<br/>
-
+<br/>
                             בברכה,<br>
                             <strong>Just Rent It</strong>
 
@@ -214,12 +246,12 @@ namespace JustRentItAPI.Services.Classes
                             • שם: {owner.FirstName} {owner.LastName}<br>
                             • אימייל: {owner.Email}<br>
                             • טלפון: {owner.Phone}<br/>
-
+<br/>
                             <strong>בבקשה, כשאת יוצרת קשר עם בעלת השמלה צייני שהגעת דרך האתר JUST-RENT-IT</strong>.<br/>
-
+<br/>
                             נשמח לשמוע ולהתעדכן מה קורה עם השמלה אהבת? השכרת? ספרי לנו! <br>
                             אם משהו לא ברור או שיש לך שאלה, אני כאן לכל דבר.<br/>
-
+<br/>
                             בברכה,<br>
                             <strong>Just Rent It dress</strong>
 
@@ -260,13 +292,13 @@ namespace JustRentItAPI.Services.Classes
                             נשמח שתעדכני אותנו מה קורה בהמשך האם יצרתן קשר? האם השמלה הושכרה?<br/>
 
                             במידה ולא נקבל עדכון מצידך, תישלח אלייך תזכורת אוטומטית.<br>
-                            אם לא יתקבל עדכון גם לאחר התזכורת, השמלה עשויה לרדת מהאתר באופן זמני עד לקבלת מידע נוסף.<br/>
+                            אם לא יתקבל עדכון גם לאחר התזכורת, השמלה עשויה לרדת מהאתר באופן זמני עד לקבלת מידע נוסף.<br/><br/>
 
                             <strong>חשוב לדעת:</strong><br>
-                            במקרה של השכרה דרך האתר, תחול עמלה של 15% ממחיר ההשכרה, אותה יש להעביר בהעברה בנקאית. פרטי החשבון יימסרו במקרה של השכרה.<br/>
-
+                            במקרה של השכרה דרך האתר, <br/>תחול עמלה של 15% ממחיר ההשכרה,<br/> אותה יש להעביר בהעברה בנקאית. פרטי החשבון יימסרו במקרה של השכרה.<br/>
+<br/>
                             לכל שאלה או צורך בעזרה אנחנו כאן בשבילך.<br/>
-
+<br/>
                             בברכה,<br>
                             <strong>Just Rent It dress</strong>
 
@@ -426,7 +458,7 @@ namespace JustRentItAPI.Services.Classes
                             <p>בברכה,<br/>צוות Just Rent It</p>
                         </div>
                     ";
-            return await SendEmailAsync(user.Email, subject, body);
+            return await SendEmailAsync(user.Email, subject, body, _smtpNoReply);
         }
     }
 }

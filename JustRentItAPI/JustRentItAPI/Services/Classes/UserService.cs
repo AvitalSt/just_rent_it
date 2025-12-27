@@ -73,7 +73,7 @@ namespace JustRentItAPI.Services.Classes
                     {
                         IsSuccess = false,
                         StatusCode = HttpStatusCode.NotFound,
-                        Message = "User not found"
+                        Message = "משתמש לא נמצא במערכת"
                     };
 
                 var dto = await UserMapper.ToDTO(user, _wishlistRepository);
@@ -118,7 +118,7 @@ namespace JustRentItAPI.Services.Classes
                     {
                         IsSuccess = false,
                         StatusCode = HttpStatusCode.NotFound,
-                        Message = "User not found"
+                        Message = "משתמש לא נמצא במערכת"
                     };
                 }
 
@@ -204,7 +204,7 @@ namespace JustRentItAPI.Services.Classes
                     {
                         IsSuccess = false,
                         StatusCode = HttpStatusCode.NotFound,
-                        Message = "User not found"
+                        Message = "משתמש לא נמצא במערכת"
                     };
 
                 var token = Guid.NewGuid().ToString();

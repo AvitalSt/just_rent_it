@@ -5,54 +5,38 @@ using JustRentItAPI.Repositories.Interfaces;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.Fonts;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Drawing.Processing;
-
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 
 namespace JustRentItAPI.Repositories.Classes
 {
     public class ImageRepository : IImageRepository
     {
         private readonly AppDbContext _context;
-        //Directory.GetCurrentDirectory() מחזיר את התיקייה בה האפלקציה רצה כרגע
-        //Path.Combine מחבר את הנתיב של התיקייה עם שם התיקייה 
-        private readonly string _imageFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
+        private readonly Cloudinary _cloudinary;
 
-        public ImageRepository(AppDbContext context)
+        public ImageRepository(AppDbContext context, Cloudinary cloudinary)
         {
             _context = context;
-            //בודק אם התיקייה קיימת, אם לא קיימת יוצר אותה
-            if (!Directory.Exists(_imageFolder))
-                Directory.CreateDirectory(_imageFolder);
+            _cloudinary = cloudinary;
         }
 
         public async Task<DressImageDTO> UploadAsync(IFormFile file, int? dressId = null)
         {
-            //Guid.NewGuid() מזהה ייחודי- שלא יחזור על עצמו לעולם
-            var fileName = $"{Guid.NewGuid()}.jpg";
-            //יוצר את הנתיב של התיקייה עם הקובץ
-            var filePath = Path.Combine(_imageFolder, fileName);
-            var logoPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads", "logo-img.png");
+            var logoPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "logo-img.png");
 
             using var image = Image.Load(file.OpenReadStream());
-
-            //איכות תמונה 70 אחוז
-            var encoder = new JpegEncoder { Quality = 70 };
-
             using var logo = Image.Load(logoPath);
 
-            //חישוב גודל הלוגו בהתאם לתמונה
             float logoScale = 0.50f;
             int logoWidth = (int)(image.Width * logoScale);
             int logoHeight = logo.Height * logoWidth / logo.Width;
 
-            // שינוי גודל הלוגו
             logo.Mutate(x => x.Resize(logoWidth, logoHeight));
 
-            // מיקום במרכז
-            var position = new Point(
-                (image.Width - logoWidth) / 2,
+            var position = new SixLabors.ImageSharp.Point((image.Width - logoWidth) / 2,
                 (image.Height - logoHeight) / 2
             );
 
@@ -63,20 +47,37 @@ namespace JustRentItAPI.Repositories.Classes
                     position,
                     new GraphicsOptions
                     {
-                        AlphaCompositionMode = PixelAlphaCompositionMode.SrcOver,//שכבה מעל התמונה
-                        BlendPercentage = 0.55f//נותן שקיפטצ
+                        AlphaCompositionMode = PixelAlphaCompositionMode.SrcOver,
+                        BlendPercentage = 0.55f
                     });
             });
 
-            await image.SaveAsync(filePath, encoder);
+            using var ms = new MemoryStream();
+            await image.SaveAsJpegAsync(ms, new JpegEncoder { Quality = 70 });
+            ms.Seek(0, SeekOrigin.Begin);
+
+            var uploadParams = new ImageUploadParams()
+            {
+                File = new FileDescription(Guid.NewGuid().ToString(), ms),
+                Folder = "JustRentIt/Dresses"
+            };
+
+            var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+
+            if (uploadResult.Error != null)
+            {
+                throw new Exception($"Cloudinary Upload Error: {uploadResult.Error.Message}");
+            }
 
             DressImage? imageEntity = null;
+            string finalPath = uploadResult.SecureUrl.ToString(); 
+
             if (dressId.HasValue)
             {
                 imageEntity = new DressImage
                 {
                     DressID = dressId.Value,
-                    ImagePath = $"/Uploads/{fileName}",
+                    ImagePath = finalPath,
                     IsMain = false
                 };
                 _context.DressImages.Add(imageEntity);
@@ -86,7 +87,7 @@ namespace JustRentItAPI.Repositories.Classes
             return new DressImageDTO
             {
                 ImageID = imageEntity?.DressImageID ?? 0,
-                ImagePath = $"/Uploads/{fileName}",
+                ImagePath = finalPath,
                 IsMain = false
             };
         }
@@ -96,12 +97,6 @@ namespace JustRentItAPI.Repositories.Classes
             var image = await _context.DressImages.FindAsync(imageId);
             if (image == null)
                 return false;
-
-            var cleanPath = image.ImagePath.TrimStart('/');
-            var filePath = Path.Combine(_imageFolder, cleanPath);
-
-            if (File.Exists(filePath))
-                File.Delete(filePath);
 
             _context.DressImages.Remove(image);
             await _context.SaveChangesAsync();

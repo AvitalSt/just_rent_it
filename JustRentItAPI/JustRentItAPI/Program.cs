@@ -4,12 +4,12 @@ using JustRentItAPI.Repositories.Interfaces;
 using JustRentItAPI.Services.Classes;
 using JustRentItAPI.Services.Interfaces;
 using JustRentItAPI.Utils;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using Microsoft.Extensions.FileProviders;
 using OfficeOpenXml;
+using System.Text;
+using CloudinaryDotNet;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,6 +35,16 @@ builder.Services.AddSingleton<TokenService>();
 // Dress
 builder.Services.AddScoped<IDressRepository, DressRepository>();
 builder.Services.AddScoped<IDressService, DressService>();
+
+var cloudinaryAccount = new Account(
+    builder.Configuration["CLOUDINARY_CLOUD_NAME"],
+    builder.Configuration["CLOUDINARY_API_KEY"],
+    builder.Configuration["CLOUDINARY_API_SECRET"]
+);
+
+Cloudinary cloudinary = new Cloudinary(cloudinaryAccount);
+
+builder.Services.AddSingleton(cloudinary);
 
 // Images
 builder.Services.AddScoped<IImageRepository, ImageRepository>();
@@ -83,7 +93,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins(allowedOrigins!) 
+        policy.WithOrigins(allowedOrigins!)
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
@@ -125,14 +135,14 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
-app.UseStaticFiles();
+/*app.UseStaticFiles();
 
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
         Path.Combine(Directory.GetCurrentDirectory(), "Uploads")),
     RequestPath = "/Uploads"
-});
+});*/
 
 app.UseAuthentication();
 app.UseAuthorization();

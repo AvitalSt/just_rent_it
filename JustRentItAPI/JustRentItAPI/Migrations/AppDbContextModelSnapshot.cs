@@ -3,8 +3,8 @@ using System;
 using JustRentItAPI.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -17,28 +17,28 @@ namespace JustRentItAPI.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.10")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("JustRentItAPI.Models.Entities.AgeGroup", b =>
                 {
                     b.Property<int>("AgeGroupID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("AgeGroupID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("AgeGroupID"));
 
                     b.Property<string>("NameEnglish")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("NameHebrew")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("AgeGroupID");
 
@@ -49,19 +49,19 @@ namespace JustRentItAPI.Migrations
                 {
                     b.Property<int>("CityID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("CityID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CityID"));
 
                     b.Property<string>("NameEnglish")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("NameHebrew")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("CityID");
 
@@ -72,19 +72,19 @@ namespace JustRentItAPI.Migrations
                 {
                     b.Property<int>("ColorID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ColorID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ColorID"));
 
                     b.Property<string>("NameEnglish")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("NameHebrew")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("ColorID");
 
@@ -95,45 +95,45 @@ namespace JustRentItAPI.Migrations
                 {
                     b.Property<int>("DressID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DressID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DressID"));
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Description")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("MainImage")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int>("Price")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("SaleType")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("State")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UserID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("Views")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("DressID");
 
@@ -145,10 +145,10 @@ namespace JustRentItAPI.Migrations
             modelBuilder.Entity("JustRentItAPI.Models.Entities.DressAgeGroup", b =>
                 {
                     b.Property<int>("DressID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("AgeGroupID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("DressID", "AgeGroupID");
 
@@ -160,10 +160,10 @@ namespace JustRentItAPI.Migrations
             modelBuilder.Entity("JustRentItAPI.Models.Entities.DressCity", b =>
                 {
                     b.Property<int>("DressID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("CityID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("DressID", "CityID");
 
@@ -175,10 +175,10 @@ namespace JustRentItAPI.Migrations
             modelBuilder.Entity("JustRentItAPI.Models.Entities.DressColor", b =>
                 {
                     b.Property<int>("DressID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("ColorID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("DressID", "ColorID");
 
@@ -190,10 +190,10 @@ namespace JustRentItAPI.Migrations
             modelBuilder.Entity("JustRentItAPI.Models.Entities.DressEventType", b =>
                 {
                     b.Property<int>("DressID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("EventTypeID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("DressID", "EventTypeID");
 
@@ -206,20 +206,20 @@ namespace JustRentItAPI.Migrations
                 {
                     b.Property<int>("DressImageID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DressImageID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("DressImageID"));
 
                     b.Property<int>("DressID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("ImagePath")
                         .IsRequired()
                         .HasMaxLength(300)
-                        .HasColumnType("nvarchar(300)");
+                        .HasColumnType("character varying(300)");
 
                     b.Property<bool>("IsMain")
-                        .HasColumnType("bit");
+                        .HasColumnType("boolean");
 
                     b.HasKey("DressImageID");
 
@@ -231,10 +231,10 @@ namespace JustRentItAPI.Migrations
             modelBuilder.Entity("JustRentItAPI.Models.Entities.DressSize", b =>
                 {
                     b.Property<int>("DressID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("SizeID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("DressID", "SizeID");
 
@@ -247,19 +247,19 @@ namespace JustRentItAPI.Migrations
                 {
                     b.Property<int>("EventTypeID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EventTypeID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EventTypeID"));
 
                     b.Property<string>("NameEnglish")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.Property<string>("NameHebrew")
                         .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("EventTypeID");
 
@@ -270,18 +270,18 @@ namespace JustRentItAPI.Migrations
                 {
                     b.Property<int>("FavoriteID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FavoriteID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FavoriteID"));
 
                     b.Property<int>("DressID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("SavedDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("UserID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("FavoriteID");
 
@@ -296,51 +296,51 @@ namespace JustRentItAPI.Migrations
                 {
                     b.Property<int>("InterestID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InterestID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("InterestID"));
 
                     b.Property<int>("DressID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("OwnerComment")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<int>("OwnerMailCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<decimal>("PaymentAmount")
                         .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
+                        .HasColumnType("numeric(10,2)");
 
                     b.Property<DateTime>("SentDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<string>("UserComment")
                         .IsRequired()
                         .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<int>("UserID")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<int>("UserMailCount")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.HasKey("InterestID");
 
@@ -355,12 +355,12 @@ namespace JustRentItAPI.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime>("SentAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
@@ -371,14 +371,14 @@ namespace JustRentItAPI.Migrations
                 {
                     b.Property<int>("SizeID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SizeID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("SizeID"));
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                        .HasColumnType("character varying(10)");
 
                     b.HasKey("SizeID");
 
@@ -389,49 +389,49 @@ namespace JustRentItAPI.Migrations
                 {
                     b.Property<int>("UserID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserID"));
 
                     b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
+                        .HasColumnType("character varying(150)");
 
                     b.Property<string>("FirstName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
                         .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasColumnType("character varying(100)");
 
                     b.Property<string>("Password")
                         .IsRequired()
                         .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("PasswordResetToken")
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("text");
 
                     b.Property<string>("Phone")
                         .IsRequired()
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("character varying(20)");
 
                     b.Property<int>("Role")
-                        .HasColumnType("int");
+                        .HasColumnType("integer");
 
                     b.Property<DateTime?>("TokenExpiration")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("UpdateAt")
-                        .HasColumnType("datetime2");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("UserID");
 

@@ -1,12 +1,13 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
 namespace JustRentItAPI.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class InitialPostgres : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,10 +16,10 @@ namespace JustRentItAPI.Migrations
                 name: "AgeGroups",
                 columns: table => new
                 {
-                    AgeGroupID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    NameEnglish = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    NameHebrew = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    AgeGroupID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    NameEnglish = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    NameHebrew = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -29,10 +30,10 @@ namespace JustRentItAPI.Migrations
                 name: "Cities",
                 columns: table => new
                 {
-                    CityID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    NameEnglish = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    NameHebrew = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    CityID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    NameEnglish = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    NameHebrew = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -43,10 +44,10 @@ namespace JustRentItAPI.Migrations
                 name: "Colors",
                 columns: table => new
                 {
-                    ColorID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    NameEnglish = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    NameHebrew = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    ColorID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    NameEnglish = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    NameHebrew = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -57,10 +58,10 @@ namespace JustRentItAPI.Migrations
                 name: "EventTypes",
                 columns: table => new
                 {
-                    EventTypeID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    NameEnglish = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
-                    NameHebrew = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
+                    EventTypeID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    NameEnglish = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    NameHebrew = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -71,9 +72,9 @@ namespace JustRentItAPI.Migrations
                 name: "MonthlySummaries",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SentAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    SentAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -84,9 +85,9 @@ namespace JustRentItAPI.Migrations
                 name: "Sizes",
                 columns: table => new
                 {
-                    SizeID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(10)", maxLength: 10, nullable: false)
+                    SizeID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Name = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -97,18 +98,18 @@ namespace JustRentItAPI.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    UserID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    FirstName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Email = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
-                    Password = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Phone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Role = table.Column<int>(type: "int", nullable: false),
-                    PasswordResetToken = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    TokenExpiration = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    UpdateAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    UserID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "character varying(150)", maxLength: 150, nullable: false),
+                    Password = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Phone = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Role = table.Column<int>(type: "integer", nullable: false),
+                    PasswordResetToken = table.Column<string>(type: "text", nullable: true),
+                    TokenExpiration = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    UpdateAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -119,18 +120,18 @@ namespace JustRentItAPI.Migrations
                 name: "Dresses",
                 columns: table => new
                 {
-                    DressID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserID = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    State = table.Column<int>(type: "int", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    SaleType = table.Column<int>(type: "int", nullable: false),
-                    Price = table.Column<int>(type: "int", nullable: false),
-                    MainImage = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    Views = table.Column<int>(type: "int", nullable: false),
-                    CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    DressID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserID = table.Column<int>(type: "integer", nullable: false),
+                    Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    State = table.Column<int>(type: "integer", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    SaleType = table.Column<int>(type: "integer", nullable: false),
+                    Price = table.Column<int>(type: "integer", nullable: false),
+                    MainImage = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    Views = table.Column<int>(type: "integer", nullable: false),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -147,8 +148,8 @@ namespace JustRentItAPI.Migrations
                 name: "DressAgeGroups",
                 columns: table => new
                 {
-                    DressID = table.Column<int>(type: "int", nullable: false),
-                    AgeGroupID = table.Column<int>(type: "int", nullable: false)
+                    DressID = table.Column<int>(type: "integer", nullable: false),
+                    AgeGroupID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -171,8 +172,8 @@ namespace JustRentItAPI.Migrations
                 name: "DressCities",
                 columns: table => new
                 {
-                    DressID = table.Column<int>(type: "int", nullable: false),
-                    CityID = table.Column<int>(type: "int", nullable: false)
+                    DressID = table.Column<int>(type: "integer", nullable: false),
+                    CityID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -195,8 +196,8 @@ namespace JustRentItAPI.Migrations
                 name: "DressColors",
                 columns: table => new
                 {
-                    DressID = table.Column<int>(type: "int", nullable: false),
-                    ColorID = table.Column<int>(type: "int", nullable: false)
+                    DressID = table.Column<int>(type: "integer", nullable: false),
+                    ColorID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -219,8 +220,8 @@ namespace JustRentItAPI.Migrations
                 name: "DressEventTypes",
                 columns: table => new
                 {
-                    DressID = table.Column<int>(type: "int", nullable: false),
-                    EventTypeID = table.Column<int>(type: "int", nullable: false)
+                    DressID = table.Column<int>(type: "integer", nullable: false),
+                    EventTypeID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -243,11 +244,11 @@ namespace JustRentItAPI.Migrations
                 name: "DressImages",
                 columns: table => new
                 {
-                    DressImageID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DressID = table.Column<int>(type: "int", nullable: false),
-                    ImagePath = table.Column<string>(type: "nvarchar(300)", maxLength: 300, nullable: false),
-                    IsMain = table.Column<bool>(type: "bit", nullable: false)
+                    DressImageID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    DressID = table.Column<int>(type: "integer", nullable: false),
+                    ImagePath = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: false),
+                    IsMain = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -264,8 +265,8 @@ namespace JustRentItAPI.Migrations
                 name: "DressSizes",
                 columns: table => new
                 {
-                    DressID = table.Column<int>(type: "int", nullable: false),
-                    SizeID = table.Column<int>(type: "int", nullable: false)
+                    DressID = table.Column<int>(type: "integer", nullable: false),
+                    SizeID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -288,11 +289,11 @@ namespace JustRentItAPI.Migrations
                 name: "Favorites",
                 columns: table => new
                 {
-                    FavoriteID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserID = table.Column<int>(type: "int", nullable: false),
-                    DressID = table.Column<int>(type: "int", nullable: false),
-                    SavedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    FavoriteID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    UserID = table.Column<int>(type: "integer", nullable: false),
+                    DressID = table.Column<int>(type: "integer", nullable: false),
+                    SavedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -315,19 +316,19 @@ namespace JustRentItAPI.Migrations
                 name: "Interests",
                 columns: table => new
                 {
-                    InterestID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    DressID = table.Column<int>(type: "int", nullable: false),
-                    UserID = table.Column<int>(type: "int", nullable: false),
-                    SentDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    PaymentAmount = table.Column<decimal>(type: "decimal(10,2)", precision: 10, scale: 2, nullable: false),
-                    Notes = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    OwnerComment = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    UserComment = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    Message = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    OwnerMailCount = table.Column<int>(type: "int", nullable: false),
-                    UserMailCount = table.Column<int>(type: "int", nullable: false)
+                    InterestID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    DressID = table.Column<int>(type: "integer", nullable: false),
+                    UserID = table.Column<int>(type: "integer", nullable: false),
+                    SentDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    PaymentAmount = table.Column<decimal>(type: "numeric(10,2)", precision: 10, scale: 2, nullable: false),
+                    Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    OwnerComment = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    UserComment = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    Message = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    OwnerMailCount = table.Column<int>(type: "integer", nullable: false),
+                    UserMailCount = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

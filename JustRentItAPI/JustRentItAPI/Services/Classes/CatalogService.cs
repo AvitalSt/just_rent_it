@@ -42,12 +42,20 @@ namespace JustRentItAPI.Services.Classes
 
         private async Task<byte[]> GeneratePdfFromHtml(string html)
         {
-            await new BrowserFetcher().DownloadAsync();
-
-            var browser = await Puppeteer.LaunchAsync(new LaunchOptions
+            var launchOptions = new LaunchOptions
             {
-                Headless = true
-            });
+                Headless = true,
+                ExecutablePath = Environment.GetEnvironmentVariable("PUPPETEER_EXECUTABLE_PATH") ?? "/usr/bin/chromium",
+                Args = new[]
+                {
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage", 
+                    "--disable-gpu"           
+                }
+            };
+
+            await using var browser = await Puppeteer.LaunchAsync(launchOptions);
 
             using var page = await browser.NewPageAsync();
 
@@ -145,7 +153,7 @@ namespace JustRentItAPI.Services.Classes
             sb.Append("<style>" + css + "</style>");
             sb.Append("</head><body>");
 
-            sb.Append(footer);      
+            sb.Append(footer);
             sb.Append(cover);
             sb.Append(pages);
 

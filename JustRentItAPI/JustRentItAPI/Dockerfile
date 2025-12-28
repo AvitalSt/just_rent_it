@@ -21,6 +21,8 @@ COPY --from=build /app/publish .
 USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    # התקנת כרום וכל הספריות הדרושות במכה אחת
+    chromium \
     libnss3 \
     libdbus-1-3 \
     libatk1.0-0 \
@@ -38,6 +40,7 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV ASPNETCORE_URLS=http://+:${PORT:-8080}
 
 ENTRYPOINT ["dotnet", "JustRentItAPI.dll"]

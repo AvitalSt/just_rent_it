@@ -3,20 +3,24 @@ import type { NextConfig } from "next";
 const nextConfig = {
   reactStrictMode: false,
 
-  async headers() {
+ async headers() {
     return [
       {
-        source: '/(.*)',
+        source: '/:path*',
         headers: [
           {
             key: 'Cross-Origin-Opener-Policy',
             value: 'same-origin-allow-popups',
           },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'unsafe-none', 
+          },
         ],
       },
     ];
   },
-  
+
   images: {
     remotePatterns: [
       {

@@ -21,15 +21,20 @@ COPY --from=build /app/publish .
 USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    libgconf-2-4 \
-    libatk1.0-0 \
-    libgobject-2.0-0 \
     libnss3 \
-    libxss1 \
-    libasound2 \
+    libdbus-1-3 \
+    libatk1.0-0 \
     libatk-bridge2.0-0 \
-    libgtk-3-0 \
-    libgbm1 && \
+    libcups2 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    libpangocairo-1.0-0 \
+    libgtk-3-0 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

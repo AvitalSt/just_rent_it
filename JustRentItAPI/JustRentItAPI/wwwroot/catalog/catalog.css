@@ -1,5 +1,6 @@
 ﻿body {
-    font-family: 'Segoe UI', Arial;
+    font-family: "Noto Sans Hebrew", Arial, sans-serif;
+    direction: rtl;
     margin: 0;
     padding: 0;
     background: white;

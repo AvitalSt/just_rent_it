@@ -19,9 +19,9 @@ WORKDIR /app
 COPY --from=build /app/publish .
 
 USER root
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    # התקנת כרום וכל הספריות הדרושות במכה אחת
     chromium \
     libnss3 \
     libdbus-1-3 \
@@ -36,9 +36,20 @@ RUN apt-get update && \
     libgbm1 \
     libasound2 \
     libpangocairo-1.0-0 \
-    libgtk-3-0 && \
+    libgtk-3-0 \
+    fonts-noto \
+    fonts-noto-core \
+    fonts-noto-extra \
+    fonts-freefont-ttf \
+    locales && \
+    sed -i 's/# he_IL.UTF-8 UTF-8/he_IL.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+
+ENV LANG=he_IL.UTF-8
+ENV LANGUAGE=he_IL:he
+ENV LC_ALL=he_IL.UTF-8
 
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV ASPNETCORE_URLS=http://+:${PORT:-8080}

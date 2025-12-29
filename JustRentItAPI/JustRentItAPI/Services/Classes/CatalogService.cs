@@ -68,13 +68,13 @@ namespace JustRentItAPI.Services.Classes
             });
 
             await page.WaitForFunctionAsync(
-                @"() => {
-            const imgs = Array.from(document.images);
-            return imgs.length === 0 || imgs.every(img => img.complete);
-        }",
+                    @"() => {
+                const imgs = Array.from(document.images);
+                return imgs.length === 0 || imgs.every(img => img.complete);
+            }",
                 new WaitForFunctionOptions
                 {
-                    Timeout = 0
+                    Timeout = 30000
                 }
             );
 
@@ -184,11 +184,11 @@ namespace JustRentItAPI.Services.Classes
             var sb = new StringBuilder();
             int index = 1;
 
-            for (int i = 0; i < dresses.Count; i += 16)
+            for (int i = 0; i < dresses.Count; i += 12)
             {
                 var cardsHtml = new StringBuilder();
 
-                for (int j = 0; j < 16; j++)
+                for (int j = 0; j < 12; j++)
                 {
                     int idx = i + j;
                     if (idx >= dresses.Count)

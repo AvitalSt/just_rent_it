@@ -42,26 +42,41 @@ namespace JustRentItAPI.Services.Classes
 
         private async Task<byte[]> GeneratePdfFromHtml(string html)
         {
+            var exePath = Environment.GetEnvironmentVariable("PUPPETEER_EXECUTABLE_PATH");
+
             var launchOptions = new LaunchOptions
             {
                 Headless = true,
-                ExecutablePath = Environment.GetEnvironmentVariable("PUPPETEER_EXECUTABLE_PATH") ?? "/usr/bin/chromium",
+                ExecutablePath = string.IsNullOrWhiteSpace(exePath) ? null : exePath,
+                IgnoreHTTPSErrors = true,
                 Args = new[]
                 {
-                    "--no-sandbox",
-                    "--disable-setuid-sandbox",
-                    "--disable-dev-shm-usage", 
-                    "--disable-gpu"           
-                }
+            "--no-sandbox",
+            "--disable-setuid-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--ignore-certificate-errors"
+        }
             };
 
             await using var browser = await Puppeteer.LaunchAsync(launchOptions);
+            await using var page = await browser.NewPageAsync();
 
-            using var page = await browser.NewPageAsync();
+            await page.SetContentAsync(html, new NavigationOptions
+            {
+                WaitUntil = new[] { WaitUntilNavigation.Load }
+            });
 
-            await page.SetContentAsync(html);
-            await page.WaitForSelectorAsync("img");
-            await page.WaitForNetworkIdleAsync();
+            await page.WaitForFunctionAsync(
+                @"() => {
+            const imgs = Array.from(document.images);
+            return imgs.length === 0 || imgs.every(img => img.complete);
+        }",
+                new WaitForFunctionOptions
+                {
+                    Timeout = 0
+                }
+            );
 
             return await page.PdfDataAsync(new PdfOptions
             {
@@ -153,7 +168,7 @@ namespace JustRentItAPI.Services.Classes
             sb.Append("<style>" + css + "</style>");
             sb.Append("</head><body>");
 
-            sb.Append(footer);
+            sb.Append(footer);      
             sb.Append(cover);
             sb.Append(pages);
 

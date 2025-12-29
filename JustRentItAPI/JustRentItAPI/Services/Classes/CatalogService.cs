@@ -51,17 +51,29 @@ namespace JustRentItAPI.Services.Classes
                 IgnoreHTTPSErrors = true,
                 Args = new[]
                 {
-            "--no-sandbox",
-            "--disable-setuid-sandbox",
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--ignore-certificate-errors"
-        }
+                    "--no-sandbox",
+                    "--disable-setuid-sandbox",
+                    "--disable-dev-shm-usage",
+                    "--disable-gpu",
+                    "--ignore-certificate-errors",
+                    "--force-device-scale-factor=1"
+                }
             };
 
             await using var browser = await Puppeteer.LaunchAsync(launchOptions);
             await using var page = await browser.NewPageAsync();
 
+            page.DefaultTimeout = 300000;
+            page.DefaultNavigationTimeout = 300000;
+
+            await page.SetViewportAsync(new ViewPortOptions
+            {
+                Width = 794,
+                Height = 1123,
+                DeviceScaleFactor = 1
+            });
+
+            await page.EmulateMediaTypeAsync(MediaType.Print);
             await page.SetContentAsync(html, new NavigationOptions
             {
                 WaitUntil = new[] { WaitUntilNavigation.Load }
@@ -74,7 +86,7 @@ namespace JustRentItAPI.Services.Classes
             }",
                 new WaitForFunctionOptions
                 {
-                    Timeout = 30000
+                    Timeout = 300000
                 }
             );
 

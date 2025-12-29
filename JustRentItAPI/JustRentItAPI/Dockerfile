@@ -42,7 +42,7 @@ RUN apt-get update && \
     fonts-noto-extra \
     fonts-freefont-ttf \
     locales && \
-    sed -i 's/# he_IL.UTF-8 UTF-8/he_IL.UTF-8 UTF-8/' /etc/locale.gen && \
+    sed -i 's/
     locale-gen && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*

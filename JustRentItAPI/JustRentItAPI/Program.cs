@@ -17,7 +17,7 @@ builder.Host.ConfigureAppConfiguration((ctx, cfg) =>
 {
     cfg.Sources.Clear();
 
-    cfg.AddJsonFile("appsettings.json", optional: false, reloadOnChange: false)
+    cfg.AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
        .AddJsonFile($"appsettings.{ctx.HostingEnvironment.EnvironmentName}.json", optional: true, reloadOnChange: false)
        .AddEnvironmentVariables();
 });

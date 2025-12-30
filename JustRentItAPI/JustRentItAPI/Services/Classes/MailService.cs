@@ -17,11 +17,10 @@ namespace JustRentItAPI.Services.Classes
         private readonly string _imapHost;
         private readonly string _smtpPassword;
 
-        private readonly string _smtpUser;
+        private readonly string _From;
         private readonly int _imapPort;
 
         private readonly string _smtpNoReply;
-        private readonly string _smtpPasswordNoReply;
 
         private readonly string _baseUrl;
 
@@ -33,11 +32,10 @@ namespace JustRentItAPI.Services.Classes
             _imapHost = config["MailSettings:ImapHost"];
             _imapPort = int.Parse(config["MailSettings:ImapPort"]);
 
-            _smtpUser = config["MailSettings:User"];
+            _From = config["MailSettings:From"];
             _smtpPassword = config["MailSettings:Password"];
 
-            _smtpNoReply = config["MailSettings:No-Reply"];
-            _smtpPasswordNoReply = config["MailSettings:PasswordNo-Reply"];
+            _smtpNoReply = config["MailSettings:NoReply"];
 
             _baseUrl = config["FrontendUrl"];
         }
@@ -102,8 +100,8 @@ namespace JustRentItAPI.Services.Classes
         public async Task<Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null)
         {
             var traceId = Guid.NewGuid().ToString("N");
-            var senderEmail = fromEmail ?? _smtpUser;
-            var senderPassword = (senderEmail == _smtpNoReply) ? _smtpPasswordNoReply : _smtpPassword;
+            var senderEmail = fromEmail ?? _From;
+            var senderPassword =  _smtpPassword;
 
             var message = new MimeMessage();
             message.MessageId = MimeKit.Utils.MimeUtils.GenerateMessageId();
@@ -132,10 +130,10 @@ namespace JustRentItAPI.Services.Classes
                 smtpClient.Timeout = 15000;
                 smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.SslOnConnect);
+                await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.StartTls);
                 Console.WriteLine($"[MAIL:{traceId}] CONNECTED OK");
 
-                await smtpClient.AuthenticateAsync(senderEmail, senderPassword);
+                await smtpClient.AuthenticateAsync("apikey", senderPassword);
                 Console.WriteLine($"[MAIL:{traceId}] AUTH OK");
 
                 await smtpClient.SendAsync(message);

@@ -1,15 +1,14 @@
 ﻿using System.Net;
 using JustRentItAPI.Models.DTOs;
 using JustRentItAPI.Models.Entities;
-using MailKit.Security;
-using MimeKit;
-using MailKit.Net.Smtp;
-using MailKit;
-using MailKit.Net.Imap;
+using JustRentItAPI.Services.Interfaces;
+using SendGrid;
+using SendGrid.Helpers.Mail;
+using Response = JustRentItAPI.Models.DTOs.Response;
 
 namespace JustRentItAPI.Services.Classes
 {
-    public class MailService : JustRentItAPI.Services.Interfaces.IMailService
+    public class MailService : IMailService
     {
         private readonly string _smtpHost;//שרת שדרכו נשלחות המייל
         private readonly int _smtpPort;//הפורט המתאים
@@ -97,57 +96,36 @@ namespace JustRentItAPI.Services.Classes
 
                 }
         */
-        public async Task<Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null)
+        public async Task<Models.DTOs.Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null)
         {
-            var traceId = Guid.NewGuid().ToString("N");
-            var senderEmail = fromEmail ?? _From;
-            var senderPassword =  _smtpPassword;
+            var apiKey = _smtpPassword; // המפתח שלך שמתחיל ב-SG.
+            var client = new SendGridClient(apiKey);
 
-            var message = new MimeMessage();
-            message.MessageId = MimeKit.Utils.MimeUtils.GenerateMessageId();
-            message.Date = DateTimeOffset.UtcNow;
-            message.Subject = subject;
-            message.Body = new TextPart("html") { Text = body };
-            message.From.Add(new MailboxAddress("Just Rent It dress", senderEmail));
-            message.To.Add(MailboxAddress.Parse(toEmail));
+            var from = new EmailAddress(_From, "Just Rent It dress");
+            var to = new EmailAddress(toEmail);
+            var msg = MailHelper.CreateSingleEmail(from, to, subject, "", body);
 
             try
             {
-                var ips = await System.Net.Dns.GetHostAddressesAsync(_smtpHost);
-                Console.WriteLine($"[MAIL:{traceId}] DNS LOOKUP: {_smtpHost} resolved to {string.Join(", ", ips.Select(x => x.ToString()))}");
-            }
-            catch (Exception dnsEx)
-            {
-                Console.WriteLine($"[MAIL:{traceId}] DNS FAILED: {dnsEx.Message}");
-            }
+                var response = await client.SendEmailAsync(msg);
 
-            Console.WriteLine($"[MAIL:{traceId}] START to={toEmail} from={senderEmail} host={_smtpHost}:{_smtpPort}");
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("MAIL SENT VIA API OK");
+                    return new Response { IsSuccess = true, Message = "Sent", StatusCode = HttpStatusCode.OK };
+                }
 
-            try
-            {
-                using var smtpClient = new SmtpClient(new ProtocolLogger(Console.OpenStandardOutput()));
-
-                smtpClient.Timeout = 15000;
-                smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
-
-                await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.SslOnConnect); 
-                Console.WriteLine($"[MAIL:{traceId}] CONNECTED OK");
-
-                await smtpClient.AuthenticateAsync("apikey", senderPassword);
-                Console.WriteLine($"[MAIL:{traceId}] AUTH OK");
-
-                await smtpClient.SendAsync(message);
-                Console.WriteLine($"[MAIL:{traceId}] SENT OK");
-
-                await smtpClient.DisconnectAsync(true);
-                return new Response { IsSuccess = true, Message = "Sent", StatusCode = HttpStatusCode.OK };
+                var errorBody = await response.Body.ReadAsStringAsync();
+                Console.WriteLine($"API ERROR: {response.StatusCode} - {errorBody}");
+                return new Response { IsSuccess = false, Message = "API Error", StatusCode = response.StatusCode };
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[MAIL:{traceId}] FULL ERROR: {ex}");
+                Console.WriteLine($"FATAL API ERROR: {ex.Message}");
                 return new Response { IsSuccess = false, Message = ex.Message, StatusCode = HttpStatusCode.InternalServerError };
             }
         }
+
         public async Task SendDressDeletedAsync(Dress dress)
         {
             if (dress.User == null || string.IsNullOrWhiteSpace(dress.User.Email))

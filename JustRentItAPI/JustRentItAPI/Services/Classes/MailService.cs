@@ -120,8 +120,7 @@ namespace JustRentItAPI.Services.Classes
             try
             {
                 using var smtpClient = new SmtpClient();
-
-                await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.StartTls);
+                await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.SslOnConnect);
                 Console.WriteLine($"[MAIL:{traceId}] CONNECTED");
 
                 await smtpClient.AuthenticateAsync(senderEmail, senderPassword);

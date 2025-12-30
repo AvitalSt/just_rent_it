@@ -34,13 +34,27 @@ namespace JustRentItAPI.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetCatalog()
+        public IActionResult GetCatalog()
         {
-            var pdf = await _catalogService.GetCatalogAsync();
-            if (pdf.Length == 0)
-                return NotFound("קטלוג עדיין לא נוצר");
+            var cloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME");
+            var url = $"https://res.cloudinary.com/{cloudName}/raw/upload/catalog/latest.pdf";
 
-            return File(pdf, "application/pdf", "catalog.pdf");
+            Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
+
+            return Redirect(url);
         }
+
+        /* [HttpGet]
+         public async Task<IActionResult> GetCatalog()
+         {
+             var pdf = await _catalogService.GetCatalogAsync();
+             if (pdf.Length == 0)
+                 return NotFound("קטלוג עדיין לא נוצר");
+
+             return File(pdf, "application/pdf", "catalog.pdf");
+         }*/
+
     }
 }

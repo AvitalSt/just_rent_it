@@ -3,8 +3,11 @@ using JustRentItAPI.Repositories.Interfaces;
 using JustRentItAPI.Services.Interfaces;
 using PuppeteerSharp;
 using PuppeteerSharp.Media;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using System.Net;
 using System.Text;
+
 
 using JustResponse = JustRentItAPI.Models.DTOs.Response;
 using JustGenericResponse = JustRentItAPI.Models.DTOs.Response<byte[]>;
@@ -15,22 +18,25 @@ namespace JustRentItAPI.Services.Classes
     {
         private readonly IDressRepository _dressRepository;
         private readonly IWebHostEnvironment _env;
+        private readonly Cloudinary _cloudinary;
 
         private readonly string _baseUrl;
-        private readonly string _catalogPath;
-        private readonly string _templatesPath;
+/*        private readonly string _catalogPath;
+*/        private readonly string _templatesPath;
 
         public CatalogService(
             IDressRepository dresses,
             IWebHostEnvironment env,
-            IConfiguration config)
+            IConfiguration config,
+            Cloudinary cloudinary)
         {
             _dressRepository = dresses;
             _env = env;
+            _cloudinary = cloudinary;
 
             _baseUrl = config["ApiBaseUrl"];
-            _catalogPath = Path.Combine(_env.WebRootPath, "catalog.pdf");
-
+/*            _catalogPath = Path.Combine(_env.WebRootPath, "catalog.pdf");
+*/
             _templatesPath = Path.Combine(_env.WebRootPath, "catalog");
         }
 
@@ -133,17 +139,52 @@ namespace JustRentItAPI.Services.Classes
             }
         }
 
+        /*    public async Task<JustResponse> SaveCatalogAsync(byte[] pdf)
+            {
+                try
+                {
+                    await File.WriteAllBytesAsync(_catalogPath, pdf);
+
+                    return new JustResponse
+                    {
+                        IsSuccess = true,
+                        StatusCode = HttpStatusCode.OK,
+                        Message = "הקטלוג נשמר בהצלחה."
+                    };
+                }
+                catch (Exception ex)
+                {
+                    return new JustResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.InternalServerError,
+                        Message = "שגיאה בשמירת הקטלוג: " + ex.Message
+                    };
+                }
+            }
+    */
         public async Task<JustResponse> SaveCatalogAsync(byte[] pdf)
         {
             try
             {
-                await File.WriteAllBytesAsync(_catalogPath, pdf);
+                using var ms = new MemoryStream(pdf);
+                ms.Position = 0;
+
+                var uploadParams = new RawUploadParams
+                {
+                    File = new FileDescription("catalog.pdf", ms),
+                    PublicId = "catalog/latest",
+                    Overwrite = true,
+                    Invalidate = true,
+                };
+
+                await _cloudinary.UploadAsync(uploadParams);
 
                 return new JustResponse
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK,
-                    Message = "הקטלוג נשמר בהצלחה."
+                    Message = "הקטלוג נשמר בענן."
                 };
             }
             catch (Exception ex)
@@ -158,13 +199,13 @@ namespace JustRentItAPI.Services.Classes
         }
 
 
-        public async Task<byte[]> GetCatalogAsync()
+      /*  public async Task<byte[]> GetCatalogAsync()
         {
             if (!File.Exists(_catalogPath))
                 return Array.Empty<byte>();
 
             return await File.ReadAllBytesAsync(_catalogPath);
-        }
+        }*/
 
         private string BuildHtml(List<Dress> dresses)
         {
@@ -180,7 +221,7 @@ namespace JustRentItAPI.Services.Classes
             sb.Append("<style>" + css + "</style>");
             sb.Append("</head><body>");
 
-            sb.Append(footer);      
+            sb.Append(footer);
             sb.Append(cover);
             sb.Append(pages);
 

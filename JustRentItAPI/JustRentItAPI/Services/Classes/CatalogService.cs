@@ -176,7 +176,7 @@ namespace JustRentItAPI.Services.Classes
                     PublicId = "catalog/latest",
                     Overwrite = true,
                     Invalidate = true,
-                    Type = "upload"
+                    AccessMode = "public"
                 };
 
                 await _cloudinary.UploadAsync(uploadParams);

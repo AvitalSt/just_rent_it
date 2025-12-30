@@ -43,60 +43,115 @@ namespace JustRentItAPI.Services.Classes
         }
 
 
+        /*        public async Task<Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null)
+                {
+                    var senderEmail = fromEmail ?? _smtpUser;
+                    var senderPassword = (senderEmail == _smtpNoReply) ? _smtpPasswordNoReply : _smtpPassword;
+
+                    var message = new MimeMessage
+                    {
+                        Subject = subject,
+                        Body = new TextPart("html") { Text = body }
+                    };
+
+                    message.From.Add(new MailboxAddress("Just Rent It dress", senderEmail));
+                    message.To.Add(MailboxAddress.Parse(toEmail));
+
+                    try
+                    {
+                        using (var smtpClient = new SmtpClient())
+                        {
+                            await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.StartTls);
+                            await smtpClient.AuthenticateAsync(senderEmail, senderPassword);
+                            await smtpClient.SendAsync(message);
+                            await smtpClient.DisconnectAsync(true);
+                        }
+
+                      *//*  using (var imapClient = new ImapClient())
+                        {
+                            await imapClient.ConnectAsync(_imapHost, _imapPort, true);
+                            await imapClient.AuthenticateAsync(senderEmail, senderPassword);
+
+                            var sentFolder = imapClient.GetFolder(SpecialFolder.Sent);
+                            await sentFolder.OpenAsync(FolderAccess.ReadWrite);
+                            await sentFolder.AppendAsync(message, MessageFlags.Seen);
+
+                            await imapClient.DisconnectAsync(true);
+                        }*//*
+
+                        return new Response
+                        {
+                            IsSuccess = true,
+                            Message = "Email sent and saved successfully",
+                            StatusCode = HttpStatusCode.OK
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("MAIL FAILED: " + ex);
+                        return new Response
+                        {
+                            IsSuccess = false,
+                            Message = "Email failed: " + ex.Message,
+                            StatusCode = HttpStatusCode.InternalServerError
+                        };
+                    }
+
+                }
+        */
         public async Task<Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null)
         {
+            var traceId = Guid.NewGuid().ToString("N");
+
             var senderEmail = fromEmail ?? _smtpUser;
             var senderPassword = (senderEmail == _smtpNoReply) ? _smtpPasswordNoReply : _smtpPassword;
 
-            var message = new MimeMessage
-            {
-                Subject = subject,
-                Body = new TextPart("html") { Text = body }
-            };
+            var message = new MimeMessage();
+            message.MessageId = MimeKit.Utils.MimeUtils.GenerateMessageId();
+            message.Date = DateTimeOffset.UtcNow;
 
+            message.Subject = subject;
+            message.Body = new TextPart("html") { Text = body };
             message.From.Add(new MailboxAddress("Just Rent It dress", senderEmail));
             message.To.Add(MailboxAddress.Parse(toEmail));
 
+            Console.WriteLine($"[MAIL:{traceId}] START to={toEmail} from={senderEmail} host={_smtpHost}:{_smtpPort} msgId={message.MessageId}");
+
             try
             {
-                using (var smtpClient = new SmtpClient())
-                {
-                    await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.StartTls);
-                    await smtpClient.AuthenticateAsync(senderEmail, senderPassword);
-                    await smtpClient.SendAsync(message);
-                    await smtpClient.DisconnectAsync(true);
-                }
+                using var smtpClient = new SmtpClient();
 
-              /*  using (var imapClient = new ImapClient())
-                {
-                    await imapClient.ConnectAsync(_imapHost, _imapPort, true);
-                    await imapClient.AuthenticateAsync(senderEmail, senderPassword);
+                await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.StartTls);
+                Console.WriteLine($"[MAIL:{traceId}] CONNECTED");
 
-                    var sentFolder = imapClient.GetFolder(SpecialFolder.Sent);
-                    await sentFolder.OpenAsync(FolderAccess.ReadWrite);
-                    await sentFolder.AppendAsync(message, MessageFlags.Seen);
+                await smtpClient.AuthenticateAsync(senderEmail, senderPassword);
+                Console.WriteLine($"[MAIL:{traceId}] AUTH OK");
 
-                    await imapClient.DisconnectAsync(true);
-                }*/
+                await smtpClient.SendAsync(message);
+                Console.WriteLine($"[MAIL:{traceId}] SENT OK");
+
+                await smtpClient.DisconnectAsync(true);
+                Console.WriteLine($"[MAIL:{traceId}] DISCONNECTED");
 
                 return new Response
                 {
                     IsSuccess = true,
-                    Message = "Email sent and saved successfully",
+                    Message = $"Email sent successfully (traceId={traceId})",
                     StatusCode = HttpStatusCode.OK
                 };
             }
             catch (Exception ex)
             {
-                Console.WriteLine("MAIL FAILED: " + ex);
+                // ex.ToString() נותן stack trace מלא ב-Render Logs
+                Console.WriteLine($"[MAIL:{traceId}] FAILED: {ex}");
+
                 return new Response
                 {
                     IsSuccess = false,
-                    Message = "Email failed: " + ex.Message,
+                    Message = $"Email failed (traceId={traceId}): {ex.Message}",
                     StatusCode = HttpStatusCode.InternalServerError
                 };
             }
-
         }
 
         public async Task SendDressDeletedAsync(Dress dress)

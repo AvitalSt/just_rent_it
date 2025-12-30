@@ -18,11 +18,18 @@ export default function DressEditImages({
 }: DressEditImagesProps) {
   const API_BASE_ORIGIN = process.env.NEXT_PUBLIC_API_BASE_ORIGIN;
 
+  const toImgUrl = (path?: string) => {
+    if (!path) return "";
+    return path.startsWith("http")
+      ? path
+      : `${API_BASE_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`;
+  };
+
   const [modalIndex, setModalIndex] = useState<number | null>(null);
   const allImages = [
     ...dress.images
       .filter((img) => !removeImages.includes(img.imageID))
-      .map((img) => `${API_BASE_ORIGIN}${img.imagePath}`),
+      .map((img) => toImgUrl(img.imagePath)),
     ...newPreview,
   ];
 
@@ -34,7 +41,7 @@ export default function DressEditImages({
         {dress.images
           .filter((img) => !removeImages.includes(img.imageID))
           .map((img) => {
-            const full = `${API_BASE_ORIGIN}${img.imagePath}`;
+            const full = toImgUrl(img.imagePath);
             return (
               <div key={img.imageID} className="relative border rounded p-2">
                 <button
@@ -108,13 +115,12 @@ export default function DressEditImages({
         ))}
       </div>
       {modalIndex !== null && (
-  <ImageModal
-    images={allImages}
-    startIndex={modalIndex}
-    onClose={() => setModalIndex(null)}
-  />
-)}
-
+        <ImageModal
+          images={allImages}
+          startIndex={modalIndex}
+          onClose={() => setModalIndex(null)}
+        />
+      )}
     </div>
   );
 }

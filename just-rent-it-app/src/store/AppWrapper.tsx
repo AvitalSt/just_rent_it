@@ -19,7 +19,7 @@ export const AppWrapper: React.FC<AppWrapperProps> = ({ children }) => {
 
     const fetchCurrentUser = async () => {
       try {
-        const res = await currentUser(token);
+        const res = await currentUser();
         dispatch(setUser({ user: res }));
         dispatch(setWishlistDressIds(res.wishlistDressIds));
       } catch {

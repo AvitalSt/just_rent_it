@@ -67,7 +67,7 @@ namespace JustRentItAPI.Services.Classes
                     await smtpClient.DisconnectAsync(true);
                 }
 
-                using (var imapClient = new ImapClient())
+              /*  using (var imapClient = new ImapClient())
                 {
                     await imapClient.ConnectAsync(_imapHost, _imapPort, true);
                     await imapClient.AuthenticateAsync(senderEmail, senderPassword);
@@ -77,7 +77,7 @@ namespace JustRentItAPI.Services.Classes
                     await sentFolder.AppendAsync(message, MessageFlags.Seen);
 
                     await imapClient.DisconnectAsync(true);
-                }
+                }*/
 
                 return new Response
                 {
@@ -88,8 +88,13 @@ namespace JustRentItAPI.Services.Classes
             }
             catch (Exception ex)
             {
-                Console.WriteLine("MAIL FAILED: " + ex.ToString());
-                throw; // זמני לבדיקה
+                Console.WriteLine("MAIL FAILED: " + ex);
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = "Email failed: " + ex.Message,
+                    StatusCode = HttpStatusCode.InternalServerError
+                };
             }
 
         }

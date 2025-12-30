@@ -130,7 +130,7 @@ namespace JustRentItAPI.Services.Classes
                 smtpClient.Timeout = 15000;
                 smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.StartTls);
+                await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.SslOnConnect); 
                 Console.WriteLine($"[MAIL:{traceId}] CONNECTED OK");
 
                 await smtpClient.AuthenticateAsync("apikey", senderPassword);

@@ -102,26 +102,38 @@ namespace JustRentItAPI.Services.Classes
         public async Task<Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null)
         {
             var traceId = Guid.NewGuid().ToString("N");
-
             var senderEmail = fromEmail ?? _smtpUser;
             var senderPassword = (senderEmail == _smtpNoReply) ? _smtpPasswordNoReply : _smtpPassword;
 
             var message = new MimeMessage();
             message.MessageId = MimeKit.Utils.MimeUtils.GenerateMessageId();
             message.Date = DateTimeOffset.UtcNow;
-
             message.Subject = subject;
             message.Body = new TextPart("html") { Text = body };
             message.From.Add(new MailboxAddress("Just Rent It dress", senderEmail));
             message.To.Add(MailboxAddress.Parse(toEmail));
 
-            Console.WriteLine($"[MAIL:{traceId}] START to={toEmail} from={senderEmail} host={_smtpHost}:{_smtpPort} msgId={message.MessageId}");
+            try
+            {
+                var ips = await System.Net.Dns.GetHostAddressesAsync(_smtpHost);
+                Console.WriteLine($"[MAIL:{traceId}] DNS LOOKUP: {_smtpHost} resolved to {string.Join(", ", ips.Select(x => x.ToString()))}");
+            }
+            catch (Exception dnsEx)
+            {
+                Console.WriteLine($"[MAIL:{traceId}] DNS FAILED: {dnsEx.Message}");
+            }
+
+            Console.WriteLine($"[MAIL:{traceId}] START to={toEmail} from={senderEmail} host={_smtpHost}:{_smtpPort}");
 
             try
             {
-                using var smtpClient = new SmtpClient();
+                using var smtpClient = new SmtpClient(new ProtocolLogger(Console.OpenStandardOutput()));
+
+                smtpClient.Timeout = 15000;
+                smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
+
                 await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.SslOnConnect);
-                Console.WriteLine($"[MAIL:{traceId}] CONNECTED");
+                Console.WriteLine($"[MAIL:{traceId}] CONNECTED OK");
 
                 await smtpClient.AuthenticateAsync(senderEmail, senderPassword);
                 Console.WriteLine($"[MAIL:{traceId}] AUTH OK");
@@ -130,29 +142,14 @@ namespace JustRentItAPI.Services.Classes
                 Console.WriteLine($"[MAIL:{traceId}] SENT OK");
 
                 await smtpClient.DisconnectAsync(true);
-                Console.WriteLine($"[MAIL:{traceId}] DISCONNECTED");
-
-                return new Response
-                {
-                    IsSuccess = true,
-                    Message = $"Email sent successfully (traceId={traceId})",
-                    StatusCode = HttpStatusCode.OK
-                };
+                return new Response { IsSuccess = true, Message = "Sent", StatusCode = HttpStatusCode.OK };
             }
             catch (Exception ex)
             {
-                // ex.ToString() נותן stack trace מלא ב-Render Logs
-                Console.WriteLine($"[MAIL:{traceId}] FAILED: {ex}");
-
-                return new Response
-                {
-                    IsSuccess = false,
-                    Message = $"Email failed (traceId={traceId}): {ex.Message}",
-                    StatusCode = HttpStatusCode.InternalServerError
-                };
+                Console.WriteLine($"[MAIL:{traceId}] FULL ERROR: {ex}");
+                return new Response { IsSuccess = false, Message = ex.Message, StatusCode = HttpStatusCode.InternalServerError };
             }
         }
-
         public async Task SendDressDeletedAsync(Dress dress)
         {
             if (dress.User == null || string.IsNullOrWhiteSpace(dress.User.Email))

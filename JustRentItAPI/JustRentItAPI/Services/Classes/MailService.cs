@@ -59,7 +59,6 @@ namespace JustRentItAPI.Services.Classes
 
             try
             {
-                // 1. SMTP - שליחת המייל
                 using (var smtpClient = new SmtpClient())
                 {
                     await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.StartTls);
@@ -89,13 +88,10 @@ namespace JustRentItAPI.Services.Classes
             }
             catch (Exception ex)
             {
-                return new Response
-                {
-                    IsSuccess = false,
-                    Message = ex.Message,
-                    StatusCode = HttpStatusCode.InternalServerError
-                };
+                Console.WriteLine("MAIL FAILED: " + ex.ToString());
+                throw; // זמני לבדיקה
             }
+
         }
 
         public async Task SendDressDeletedAsync(Dress dress)

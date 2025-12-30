@@ -30,11 +30,11 @@ export default function DressCard({
   };
 
   const imageUrl = dress.mainImage
-    ? `${API_BASE_ORIGIN}${
-        dress.mainImage.startsWith("/")
-          ? dress.mainImage
-          : "/" + dress.mainImage
-      }`
+    ? dress.mainImage.startsWith("http")
+      ? dress.mainImage
+      : `${API_BASE_ORIGIN}${dress.mainImage.startsWith("/") ? "" : "/"}${
+          dress.mainImage
+        }`
     : null;
 
   return (

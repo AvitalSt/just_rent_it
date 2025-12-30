@@ -1,4 +1,4 @@
-import Link from "next/link"; 
+import Link from "next/link";
 import { MostViewedSectionProps } from "@/models/types/home/MostViewedSection.types";
 
 export default function MostViewedSection({ initial }: MostViewedSectionProps) {
@@ -10,9 +10,7 @@ export default function MostViewedSection({ initial }: MostViewedSectionProps) {
         <h2 className="text-4xl md:text-5xl font-extralight text-black mb-4">
           השמלות הכי נצפות
         </h2>
-        <p className="text-gray-500 font-light">
-          השמלות שכולם מתעניינים בהן
-        </p>
+        <p className="text-gray-500 font-light">השמלות שכולם מתעניינים בהן</p>
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -23,7 +21,11 @@ export default function MostViewedSection({ initial }: MostViewedSectionProps) {
             className="aspect-[3/4] bg-gray-200 relative overflow-hidden group"
           >
             <img
-              src={`${API_BASE_ORIGIN}${dress.mainImage}`}
+              src={
+                dress.mainImage.startsWith("http")
+                  ? dress.mainImage
+                  : `${API_BASE_ORIGIN}${dress.mainImage}`
+              }
               alt={dress.name}
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />

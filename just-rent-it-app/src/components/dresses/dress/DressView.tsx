@@ -51,12 +51,19 @@ export default function DressView({ dress, reload }: DressViewProps) {
   const [loadingActivate, setLoadingActivate] = useState(false);
   const [loadingDelete, setLoadingDelete] = useState(false);
 
+  const toImgUrl = (path?: string) => {
+    if (!path) return "";
+    return path.startsWith("http")
+      ? path
+      : `${API_BASE_ORIGIN}${path.startsWith("/") ? "" : "/"}${path}`;
+  };
+
   const galleryImages = [
     dress.mainImage,
     ...dress.images
       .filter((img) => img.imagePath !== dress.mainImage)
       .map((img) => img.imagePath),
-  ].map((img) => `${API_BASE_ORIGIN}${img}`);
+  ].map(toImgUrl);
 
   const toggleButtonClasses =
     "w-full py-3 rounded-lg border bg-gray-100 hover:bg-gray-200 font-medium transition";

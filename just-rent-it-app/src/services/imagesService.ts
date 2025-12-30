@@ -1,15 +1,17 @@
 import { DressImageDTO } from "@/models/DTOs/ImageDTO";
 import { axiosInstance } from "@/services/axiosInstance";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
-const API_BASE_Images = `${API_BASE}/Images`;
+const API_BASE_Images = "/Images";
+
+function authHeader() {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 export async function uploadImages(
   files: File[],
   dressId?: number
 ): Promise<DressImageDTO[]> {
-  const token = localStorage.getItem("token");
-
   const formData = new FormData();
 
   // הוספת כל הקבצים ל-FormData
@@ -21,9 +23,7 @@ export async function uploadImages(
   }
 
   const res = await axiosInstance.post(`${API_BASE_Images}/upload`, formData, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: authHeader(),
   });
 
   return res.data.data;

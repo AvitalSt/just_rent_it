@@ -3,17 +3,18 @@ import { UpdateUserDTO } from "@/models/DTOs/UpdateUserDTO";
 import { UserDTO } from "@/models/DTOs/UserDTO";
 import { axiosInstance } from "@/services/axiosInstance";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
-const API_BASE_Users = `${API_BASE}/Users`;
+const API_BASE_Users = "/Users";
 
-function getToken() {
-  return localStorage.getItem("token");
+function authHeader() {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 export async function sendPasswordResetEmail(email: string): Promise<any> {
-  const response = await axiosInstance.post(`${API_BASE_Users}/forgot-password`, {
-    email,
-  });
+  const response = await axiosInstance.post(
+    `${API_BASE_Users}/forgot-password`,
+    { email }
+  );
   return response.data;
 }
 
@@ -21,18 +22,16 @@ export async function resetPassword(
   token: string,
   newPassword: string
 ): Promise<AuthResponse> {
-  const response = await axiosInstance.post(`${API_BASE_Users}/reset-password`, {
-    token,
-    newPassword,
-  });
+  const response = await axiosInstance.post(
+    `${API_BASE_Users}/reset-password`,
+    { token, newPassword }
+  );
   return response.data;
 }
 
-export async function currentUser(token: string): Promise<UserDTO> {
+export async function currentUser(): Promise<UserDTO> {
   const response = await axiosInstance.get(`${API_BASE_Users}/current`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: authHeader(),
   });
   return response.data.data;
 }
@@ -41,12 +40,11 @@ export async function updateUser(
   userId: number,
   data: UpdateUserDTO
 ): Promise<UserDTO> {
-  const token = getToken();
-  const response = await axiosInstance.patch(`${API_BASE_Users}/${userId}`, data, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
+  const response = await axiosInstance.patch(
+    `${API_BASE_Users}/${userId}`,
+    data,
+    { headers: authHeader() }
+  );
 
   return response.data.data;
 }

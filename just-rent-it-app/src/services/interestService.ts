@@ -7,11 +7,11 @@ import {
 import { buildInterestParams } from "@/utils/filterUtils";
 import { axiosInstance } from "@/services/axiosInstance";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
-const API_BASE_Interest = `${API_BASE}/Interest`;
+const API_BASE_Interest = "/Interest";
 
-function getToken() {
-  return localStorage.getItem("token");
+function authHeader() {
+  const token = localStorage.getItem("token");
+  return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
 export function mapFiltersToInterestParams(filters: InterestDraftFilters) {
@@ -28,137 +28,100 @@ export async function sendInterest(
   dressId: number,
   message: string
 ): Promise<void> {
-  const token = getToken();
-
   await axiosInstance.post(
-    `${API_BASE_Interest}`,
+    API_BASE_Interest,
     { dressID: dressId, message },
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: authHeader() }
   );
 }
 
 export async function getFilteredInterests(
   params: InterestFilterParams
 ): Promise<PagedResultDTO<InterestListDTO>> {
-  const token = getToken();
-
   const res = await axiosInstance.get(API_BASE_Interest, {
     params,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: authHeader(),
   });
 
   return res.data.data;
 }
 
-export const updateStatus = async (id: number, status: string) => {
-  const token = getToken();
-
+export const updateStatus = (id: number, status: string) => {
   return axiosInstance.patch(
     `${API_BASE_Interest}/${id}/rent-status`,
     JSON.stringify(status),
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { ...authHeader(), "Content-Type": "application/json" },
     }
   );
 };
 
-export const updateNotes = async (id: number, notes: string) => {
-  const token = getToken();
-
+export const updateNotes = (id: number, notes: string) => {
   return axiosInstance.patch(
     `${API_BASE_Interest}/${id}/notes`,
     JSON.stringify(notes),
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { ...authHeader(), "Content-Type": "application/json" },
     }
   );
 };
 
-export const updateOwnerComment = async (id: number, comment: string) => {
-  const token = getToken();
-
+export const updateOwnerComment = (id: number, comment: string) => {
   return axiosInstance.patch(
     `${API_BASE_Interest}/${id}/owner-comment`,
     JSON.stringify(comment),
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { ...authHeader(), "Content-Type": "application/json" },
     }
   );
 };
 
-export const updateUserComment = async (id: number, comment: string) => {
-  const token = getToken();
-
+export const updateUserComment = (id: number, comment: string) => {
   return axiosInstance.patch(
     `${API_BASE_Interest}/${id}/user-comment`,
     JSON.stringify(comment),
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
+      headers: { ...authHeader(), "Content-Type": "application/json" },
     }
   );
 };
 
-export const messageOwner = async (id: number) => {
-  const token = getToken();
-
+export const messageOwner = (id: number) => {
   return axiosInstance.post(
     `${API_BASE_Interest}/${id}/message-owner`,
     {},
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: authHeader() }
   );
 };
 
-export const messageUser = async (id: number) => {
-  const token = getToken();
-
+export const messageUser = (id: number) => {
   return axiosInstance.post(
     `${API_BASE_Interest}/${id}/message-user`,
     {},
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: authHeader() }
   );
 };
 
 export function messageOwnerPayment(interestId: number) {
-  const token = getToken();
   return axiosInstance.post(
     `${API_BASE_Interest}/${interestId}/message-owner-payment`,
     {},
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: authHeader() }
   );
 }
 
 export function updatePaymentAmount(id: number, paymentAmount: number) {
-  const token = getToken();
   return axiosInstance.patch(
     `${API_BASE_Interest}/${id}/paymentAmount`,
     { paymentAmount },
-    { headers: { Authorization: `Bearer ${token}` } }
+    { headers: authHeader() }
   );
 }
 
 export function exportInterests(params: InterestFilterParams) {
-  const token = getToken();
-
   return axiosInstance.get(`${API_BASE_Interest}/export`, {
     params,
     responseType: "blob",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    headers: authHeader(),
   });
 }

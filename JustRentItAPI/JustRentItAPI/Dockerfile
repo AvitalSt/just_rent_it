@@ -22,6 +22,7 @@ USER root
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    libgdiplus \
     chromium \
     libnss3 \
     libdbus-1-3 \

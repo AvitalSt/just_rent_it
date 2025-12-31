@@ -14,6 +14,12 @@ namespace JustRentItAPI.Services.Classes
             _imageRepository = imageRepository;
         }
 
+        private string OptimizeUrl(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return url;
+            return url.Replace("/upload/", "/upload/f_auto,q_auto/");
+        }
+
         public async Task<Response<List<DressImageDTO>>> UploadImagesAsync(IFormFileCollection files, int? dressId = null)
         {
             try
@@ -23,7 +29,11 @@ namespace JustRentItAPI.Services.Classes
                 foreach (var file in files)
                 {
                     var image = await _imageRepository.UploadAsync(file, dressId);
-                    uploadedImages.Add(image);
+                    if (image != null)
+                    {
+                        image.ImagePath = OptimizeUrl(image.ImagePath);
+                        uploadedImages.Add(image);
+                    }
                 }
 
                 return new Response<List<DressImageDTO>>

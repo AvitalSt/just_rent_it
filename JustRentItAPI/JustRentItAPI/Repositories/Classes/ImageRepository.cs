@@ -69,25 +69,10 @@ namespace JustRentItAPI.Repositories.Classes
                 throw new Exception($"Cloudinary Upload Error: {uploadResult.Error.Message}");
             }
 
-            DressImage? imageEntity = null;
-            string finalPath = uploadResult.SecureUrl.ToString(); 
-
-            if (dressId.HasValue)
-            {
-                imageEntity = new DressImage
-                {
-                    DressID = dressId.Value,
-                    ImagePath = finalPath,
-                    IsMain = false
-                };
-                _context.DressImages.Add(imageEntity);
-                await _context.SaveChangesAsync();
-            }
-
             return new DressImageDTO
             {
-                ImageID = imageEntity?.DressImageID ?? 0,
-                ImagePath = finalPath,
+                ImageID = 0,
+                ImagePath = uploadResult.SecureUrl.ToString(),
                 IsMain = false
             };
         }
@@ -97,6 +82,14 @@ namespace JustRentItAPI.Repositories.Classes
             var image = await _context.DressImages.FindAsync(imageId);
             if (image == null)
                 return false;
+
+            var uri = new Uri(image.ImagePath);
+            var segments = uri.AbsolutePath.Split('/');
+            var fileName = segments.Last();
+            var publicIdWithoutExtension = Path.GetFileNameWithoutExtension(fileName);
+            var fullPublicId = $"JustRentIt/Dresses/{publicIdWithoutExtension}";
+            var deletionParams = new DeletionParams(fullPublicId);
+            var deletionResult = await _cloudinary.DestroyAsync(deletionParams);
 
             _context.DressImages.Remove(image);
             await _context.SaveChangesAsync();

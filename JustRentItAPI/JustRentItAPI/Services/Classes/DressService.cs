@@ -489,7 +489,8 @@ namespace JustRentItAPI.Services.Classes
                 foreach (var path in dto.AddImagePaths)
                 {
                     if (string.IsNullOrWhiteSpace(path)) continue;
-                    if (dress.Images.Any(i => i.ImagePath == path)) continue;
+                    var fileName = Path.GetFileName(path);
+                    if (dress.Images.Any(i => i.ImagePath.Contains(fileName))) continue;
 
                     dress.Images.Add(new DressImage
                     {

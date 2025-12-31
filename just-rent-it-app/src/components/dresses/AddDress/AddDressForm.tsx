@@ -57,12 +57,11 @@ export default function AddDressForm() {
   const user = useAppSelector((state) => state.user.user);
   const isLoggedIn = !!user;
 
-useEffect(() => {
-  if (!user) {
-    setShowAuthModal(true);
-  }
-}, [user]);
-
+  useEffect(() => {
+    if (!user) {
+      setShowAuthModal(true);
+    }
+  }, [user]);
 
   const handleChange = <K extends keyof AddDressDTO>(
     key: K,
@@ -108,7 +107,7 @@ useEffect(() => {
       });
 
       clearDressesCache();
-      
+
       setShowSuccessModal(true);
 
       setForm({
@@ -245,7 +244,7 @@ useEffect(() => {
             className="w-full text-base py-3 rounded-lg shadow-md hover:shadow-lg"
             disabled={loading}
           >
-            הוסף שמלה לאתר
+            {loading ? "השמלה בהעלאה..." : "הוסף שמלה לאתר"}
           </Button>
         </div>
       </div>

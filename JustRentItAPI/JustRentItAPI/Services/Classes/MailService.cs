@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using JustRentItAPI.Models.DTOs;
 using JustRentItAPI.Models.Entities;
 using JustRentItAPI.Services.Interfaces;
 using SendGrid;
@@ -10,98 +9,29 @@ namespace JustRentItAPI.Services.Classes
 {
     public class MailService : IMailService
     {
-        private readonly string _smtpHost;//שרת שדרכו נשלחות המייל
-        private readonly int _smtpPort;//הפורט המתאים
 
-        private readonly string _imapHost;
         private readonly string _smtpPassword;
-
         private readonly string _From;
-        private readonly int _imapPort;
-
         private readonly string _smtpNoReply;
 
         private readonly string _baseUrl;
 
         public MailService(IConfiguration config)
         {
-            _smtpHost = config["MailSettings:Host"];
-            _smtpPort = int.Parse(config["MailSettings:Port"]);
-
-            _imapHost = config["MailSettings:ImapHost"];
-            _imapPort = int.Parse(config["MailSettings:ImapPort"]);
-
             _From = config["MailSettings:From"];
             _smtpPassword = config["MailSettings:Password"];
-
             _smtpNoReply = config["MailSettings:NoReply"];
 
             _baseUrl = config["FrontendUrl"];
         }
 
-
-        /*        public async Task<Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null)
-                {
-                    var senderEmail = fromEmail ?? _smtpUser;
-                    var senderPassword = (senderEmail == _smtpNoReply) ? _smtpPasswordNoReply : _smtpPassword;
-
-                    var message = new MimeMessage
-                    {
-                        Subject = subject,
-                        Body = new TextPart("html") { Text = body }
-                    };
-
-                    message.From.Add(new MailboxAddress("Just Rent It dress", senderEmail));
-                    message.To.Add(MailboxAddress.Parse(toEmail));
-
-                    try
-                    {
-                        using (var smtpClient = new SmtpClient())
-                        {
-                            await smtpClient.ConnectAsync(_smtpHost, _smtpPort, SecureSocketOptions.StartTls);
-                            await smtpClient.AuthenticateAsync(senderEmail, senderPassword);
-                            await smtpClient.SendAsync(message);
-                            await smtpClient.DisconnectAsync(true);
-                        }
-
-                      *//*  using (var imapClient = new ImapClient())
-                        {
-                            await imapClient.ConnectAsync(_imapHost, _imapPort, true);
-                            await imapClient.AuthenticateAsync(senderEmail, senderPassword);
-
-                            var sentFolder = imapClient.GetFolder(SpecialFolder.Sent);
-                            await sentFolder.OpenAsync(FolderAccess.ReadWrite);
-                            await sentFolder.AppendAsync(message, MessageFlags.Seen);
-
-                            await imapClient.DisconnectAsync(true);
-                        }*//*
-
-                        return new Response
-                        {
-                            IsSuccess = true,
-                            Message = "Email sent and saved successfully",
-                            StatusCode = HttpStatusCode.OK
-                        };
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("MAIL FAILED: " + ex);
-                        return new Response
-                        {
-                            IsSuccess = false,
-                            Message = "Email failed: " + ex.Message,
-                            StatusCode = HttpStatusCode.InternalServerError
-                        };
-                    }
-
-                }
-        */
-        public async Task<Models.DTOs.Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null)
+        public async Task<Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null)
         {
-            var apiKey = _smtpPassword; // המפתח שלך שמתחיל ב-SG.
+            var apiKey = _smtpPassword; 
             var client = new SendGridClient(apiKey);
 
-            var from = new EmailAddress(_From, "Just Rent It dress");
+            var senderEmail = !string.IsNullOrEmpty(fromEmail) ? fromEmail : _From;
+            var from = new EmailAddress(senderEmail, "Just Rent It dress");
             var to = new EmailAddress(toEmail);
             var msg = MailHelper.CreateSingleEmail(from, to, subject, "", body);
 

@@ -98,7 +98,7 @@ namespace JustRentItAPI.Services.Classes
                             במידה ומשתמש יתעניין בשמלה שלך - תקבלי על כך עדכון ישירות למייל.<br/>
                             <br/>
                             תוכלי לראות את השמלה בלינק:<br>
-                            <a href='{_baseUrl}dresses/{dress.DressID}' style='color:#000; font-weight:bold;'>לחצי כאן לצפייה בשמלה</a><br/>
+                            <a href='{_baseUrl}/dresses/{dress.DressID}' style='color:#000; font-weight:bold;'>לחצי כאן לצפייה בשמלה</a><br/>
                             <br/>
                             אם יש שינוי שתרצי לבצע בשמלה (מחיר, תמונות, פרטים) - ניתן לערוך אותה בכל זמן.<br/>
                             <br/>
@@ -121,7 +121,7 @@ namespace JustRentItAPI.Services.Classes
         {
             var subject = $"עדכון לגבי השמלה \"{dressName}\" באתר Just Rent It dress";
 
-            var dressUrl = $"{_baseUrl}dresses/{dressId}";
+            var dressUrl = $"{_baseUrl}/dresses/{dressId}";
 
             var body = $@"
                         <div style='direction: rtl; text-align: right; font-family: Arial, sans-serif; font-size: 15px;'>
@@ -149,7 +149,7 @@ namespace JustRentItAPI.Services.Classes
         {
             var subject = "שמלה שהתעניינת בה באתר Just Rent It dress";
 
-            var dressUrl = $"{_baseUrl}dresses/{dressId}";
+            var dressUrl = $"{_baseUrl}/dresses/{dressId}";
 
             var body = $@"
                         <div style='direction: rtl; text-align: right; font-family: Arial, sans-serif; font-size: 15px;'>
@@ -178,7 +178,7 @@ namespace JustRentItAPI.Services.Classes
             if (string.IsNullOrWhiteSpace(user.Email))
                 return;
 
-            var dressUrl = $"{_baseUrl}dresses/{dress.DressID}";
+            var dressUrl = $"{_baseUrl}/dresses/{dress.DressID}";
 
             string body = $@"
                             <div style='font-family: Heebo, Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7;'>
@@ -216,7 +216,7 @@ namespace JustRentItAPI.Services.Classes
             if (string.IsNullOrWhiteSpace(owner.Email))
                 return;
 
-            var dressUrl = $"{_baseUrl}dresses/{dress.DressID}";
+            var dressUrl = $"{_baseUrl}/dresses/{dress.DressID}";
 
             string body = $@"
                             <div style='font-family: Heebo, Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7;'>

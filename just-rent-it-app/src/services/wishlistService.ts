@@ -9,7 +9,10 @@ function authHeader() {
 
 export const addToWishlist = async (dressId: number) => {
   const res = await axiosInstance.post(`${API_BASE_Wishlist}`, dressId, {
-    headers: authHeader(),
+    headers: {
+      ...authHeader(),
+      'Content-Type': 'application/json',
+    },
   });
   return res.data;
 };

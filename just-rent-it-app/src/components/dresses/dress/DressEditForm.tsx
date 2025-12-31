@@ -9,10 +9,7 @@ import CityFilter from "../DressFilter/Filter/CityFilter";
 import AgeGroupFilter from "../DressFilter/Filter/AgeGroupFilter";
 import EventTypeFilter from "../DressFilter/Filter/EventTypeFilter";
 
-import {
-  SaleTypeMap,
-  DressStateMap,
-} from "@/models/Enums/filtersMap";
+import { SaleTypeMap, DressStateMap } from "@/models/Enums/filtersMap";
 
 import { useDressEdit } from "@/hooks/useDressEdit";
 import { Button } from "@/components/ui/Button";
@@ -40,6 +37,7 @@ export default function DressEditForm({
     setNewPreview,
     setNewFiles,
     handleSave,
+    loading
   } = useDressEdit(dress, onSaved, options);
   const EMPTY_VALUE = -1;
 
@@ -112,7 +110,7 @@ export default function DressEditForm({
             setNewFiles={setNewFiles}
           />
         </div>
-        
+
         <div className="bg-gray-50 p-6 rounded-lg space-y-4">
           <ColorFilter
             value={form.ColorIDs}
@@ -175,8 +173,17 @@ export default function DressEditForm({
         </div>
 
         <div className="flex gap-4 pt-4">
-          <Button onClick={handleSave}>שמירה</Button>
-          <Button onClick={onCancel}>ביטול</Button>
+          <Button
+            onClick={handleSave}
+            disabled={loading}
+            className="min-w-[120px]" 
+          >
+            {loading ? "שומר..." : "שמירה"}
+          </Button>
+
+          <Button onClick={onCancel} disabled={loading}>
+            ביטול
+          </Button>
         </div>
       </div>
     </div>

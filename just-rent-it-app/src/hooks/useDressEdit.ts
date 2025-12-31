@@ -49,6 +49,8 @@ export function useDressEdit(
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [newPreview, setNewPreview] = useState<string[]>([]);
 
+  const [loading, setLoading] = useState(false);
+
   useEffect(() => {
     //מקבלת רשימת אובייקטים ורשימת מחרוזות ואז עושה filter מסננת רק את האויקיבטים שרושמים בשמלה ו-map מחזירה רק את הID שלהם
     const mapByNames = (
@@ -95,72 +97,82 @@ export function useDressEdit(
   };
 
   const handleSave = async () => {
-    let uploadedPaths: string[] = [];
+    if (loading) return;
 
-    if (newFiles.length > 0) {
-      //השרת שלנו מחזיר ניתיבם לא קבצים!
-      const uploaded = await uploadImages(newFiles, dress.dressID);
-      uploadedPaths = uploaded.map((u) => u.imagePath);
+    setLoading(true);
+    try {
+      let uploadedPaths: string[] = [];
+
+      if (newFiles.length > 0) {
+        //השרת שלנו מחזיר ניתיבם לא קבצים!
+        const uploaded = await uploadImages(newFiles, dress.dressID);
+        uploadedPaths = uploaded.map((u) => u.imagePath);
+      }
+
+      //תמונות קיימות שלא נמחקו
+      const existingImages = dress.images
+        .filter((img) => !removeImages.includes(img.imageID))
+        .map((img) => img.imagePath);
+
+      //שילוב של התמונות הקיימות כרגע עם מה שהעולה
+      const allImagesAfterEdit = [...existingImages, ...uploadedPaths];
+
+      if (allImagesAfterEdit.length === 0) {
+        alert("שמלה חייבת לכלול לפחות תמונה אחת.");
+        setLoading(false);
+        return;
+      }
+
+      //להסיר תווים לא טובים קורה כשהקובץ נשמר בעברית
+      let finalMain = selectedMainImage?.replace(/\u200f/g, "");
+
+      //some האם יש לפחות איבר אחד שעומד על התנאים
+      const mainRemoved = dress.images.some(
+        (i) => i.imagePath === finalMain && removeImages.includes(i.imageID)
+      );
+
+      if (mainRemoved) {
+        finalMain = uploadedPaths[0] ?? existingImages[0] ?? "";
+      }
+
+      if (newPreview.includes(selectedMainImage)) {
+        const idx = newPreview.indexOf(selectedMainImage);
+
+        finalMain =
+          uploadedPaths[idx] ??
+          uploadedPaths[0] ??
+          existingImages[0] ??
+          finalMain;
+      }
+
+      if (!finalMain) finalMain = allImagesAfterEdit[0];
+
+      const dto: UpdateDressDTO = {
+        Name: form.name,
+        Description: form.description,
+        ColorIDs: form.ColorIDs,
+        SizeIDs: form.SizeIDs,
+        CityIDs: form.CityIDs,
+        AgeGroupIDs: form.AgeGroupIDs,
+        EventTypeIDs: form.EventTypeIDs,
+        SaleType: form.saleType,
+        State: form.state,
+        Status: form.status,
+        MainImage: finalMain,
+        AddImagePaths: uploadedPaths,
+        RemoveImageIds: removeImages,
+      };
+
+      if (form.price && form.price > 0) dto.Price = form.price;
+
+      await updateDress(dress.dressID, dto);
+      clearDressesCache();
+      onSaved();
+    } catch (error) {
+      alert("אירעה שגיאה בשמירת הנתונים.");
+    } finally {
+      setLoading(false);
     }
-
-    //תמונות קיימות שלא נמחקו
-    const existingImages = dress.images
-      .filter((img) => !removeImages.includes(img.imageID))
-      .map((img) => img.imagePath);
-
-    //שילוב של התמונות הקיימות כרגע עם מה שהעולה
-    const allImagesAfterEdit = [...existingImages, ...uploadedPaths];
-
-    if (allImagesAfterEdit.length === 0) {
-      alert("שמלה חייבת לכלול לפחות תמונה אחת.");
-      return;
-    }
-
-    //להסיר תווים לא טובים קורה כשהקובץ נשמר בעברית
-    let finalMain = selectedMainImage?.replace(/\u200f/g, "");
-
-    //some האם יש לפחות איבר אחד שעומד על התנאים
-    const mainRemoved = dress.images.some(
-      (i) => i.imagePath === finalMain && removeImages.includes(i.imageID)
-    );
-
-    if (mainRemoved) {
-      finalMain = uploadedPaths[0] ?? existingImages[0] ?? "";
-    }
-
-    if (newPreview.includes(selectedMainImage)) {
-      const idx = newPreview.indexOf(selectedMainImage);
-
-      finalMain =
-        uploadedPaths[idx] ??
-        uploadedPaths[0] ??
-        existingImages[0] ??
-        finalMain;
-    }
-
-    if (!finalMain) finalMain = allImagesAfterEdit[0];
-
-    const dto: UpdateDressDTO = {
-      Name: form.name,
-      Description: form.description,
-      ColorIDs: form.ColorIDs,
-      SizeIDs: form.SizeIDs,
-      CityIDs: form.CityIDs,
-      AgeGroupIDs: form.AgeGroupIDs,
-      EventTypeIDs: form.EventTypeIDs,
-      SaleType: form.saleType,
-      State: form.state,
-      Status: form.status,
-      MainImage: finalMain,
-      AddImagePaths: uploadedPaths,
-      RemoveImageIds: removeImages,
-    };
-
-    if (form.price && form.price > 0) dto.Price = form.price;
-
-    await updateDress(dress.dressID, dto);
-    clearDressesCache();
-    onSaved();
   };
 
   return {
@@ -176,5 +188,6 @@ export function useDressEdit(
     setNewPreview,
     setNewFiles,
     handleSave,
+    loading
   };
 }

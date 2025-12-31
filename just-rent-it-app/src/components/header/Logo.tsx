@@ -13,7 +13,6 @@ export default function Logo() {
         width={80}
         height={40}
         style={{ width: "auto" }}
-        priority // גורם לנקסט לטוען את התמונה מהר יותר כי זה קובץ לוגו
       />
     </Link>
   );

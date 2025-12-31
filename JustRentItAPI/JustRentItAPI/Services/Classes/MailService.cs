@@ -138,8 +138,8 @@ namespace JustRentItAPI.Services.Classes
                             כחלק משיתוף הפעולה, נשמח לדעת האם חל עדכון לגבי מצב השמלה - האם הושכרה או נמכרה?
                             <br/>
                             <br/>
-                            תודה מראש,<br/>
-                            צוות Just Rent It dress
+                             בברכה,<br>
+                            <strong>Just Rent It dress</strong>
                         </div>";
 
             await SendEmailAsync(ownerEmail, subject, body);
@@ -166,8 +166,8 @@ namespace JustRentItAPI.Services.Classes
                             ולדעת איך הייתה לך החוויה באתר שלנו :)
                             <br/>
                             <br/>
-                            תודה רבה,<br/>
-                            צוות Just Rent It dress
+                             בברכה,<br>
+                            <strong>Just Rent It dress</strong>
                         </div>";
 
             await SendEmailAsync(userEmail, subject, body);
@@ -200,7 +200,7 @@ namespace JustRentItAPI.Services.Classes
                             נשמח לשמוע ולהתעדכן מה קורה עם השמלה אהבת? השכרת? ספרי לנו! <br>
                             אם משהו לא ברור או שיש לך שאלה, אני כאן לכל דבר.<br/>
                             <br/>
-                            בברכה,<br>
+                             בברכה,<br>
                             <strong>Just Rent It dress</strong>
                             </div>";
 
@@ -281,8 +281,8 @@ namespace JustRentItAPI.Services.Classes
                                 </p>
                                 נשמח לקבל צילום מסך לאישור העברה.<br/>                            
                                <br/>
-                                בברכה,<br/>
-                                צוות Just Rent It dress
+                                בברכה,<br>
+                            <strong>Just Rent It dress</strong>
                             </div>";
 
             await SendEmailAsync(ownerEmail, subject, body);
@@ -341,8 +341,8 @@ namespace JustRentItAPI.Services.Classes
                         נשמח אם תעדכני אותנו אם מישהי יצרה איתך קשר ואם משהו התקדם.<br/>
                         תודה רבה על שיתוף הפעולה!
                         <br/>
-                        <br/>
-                        צוות Just Rent It dress
+                        בברכה,<br>
+                            <strong>Just Rent It dress</strong>
                     </div>";
         }
 
@@ -366,8 +366,8 @@ namespace JustRentItAPI.Services.Classes
                         ולשמוע איך הייתה לך החוויה אצלנו :)
                         <br/>
                         <br/>
-                        תודה רבה,<br/>
-                        צוות Just Rent It dress
+                         בברכה,<br>
+                            <strong>Just Rent It dress</strong>
                     </div>";
         }
 
@@ -382,7 +382,8 @@ namespace JustRentItAPI.Services.Classes
                             <p>לחצי על הקישור הבא כדי לעדכן את הסיסמה:</p>
                             <a href='{resetLink}' style='color:#0000EE; text-decoration: underline;'>לחץ כאן</a>
                             <p>הקישור יפוג בעוד 15 דקות.</p>
-                            <p>בברכה,<br/>צוות Just Rent It</p>
+                            <p> בברכה,<br>
+                            <strong>Just Rent It dress</strong></p>
                         </div>
                     ";
             return await SendEmailAsync(user.Email, subject, body, _smtpNoReply);

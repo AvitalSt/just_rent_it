@@ -54,18 +54,28 @@ namespace JustRentItAPI.Services.Classes
         {
             try
             {
-                //מחשבים את החודש הקודם
-                /* var now = DateTime.UtcNow;
-                 int month = now.Month == 1 ? 12 : now.Month - 1;
-                 int year = now.Month == 1 ? now.Year - 1 : now.Year;
-
-                 var from = new DateTime(year, month, 1);
-                 var to = from.AddMonths(1);*/
-
                 var now = DateTime.UtcNow;
+                DateTime from;
+                DateTime to;
 
-                var from = new DateTime(now.Year, now.Month, 1);
-                var to = from.AddMonths(1);
+                var fromDate = now.AddDays(-5);
+                from = new DateTime(fromDate.Year, fromDate.Month, fromDate.Day, 0, 0, 0, DateTimeKind.Utc);
+                to = new DateTime(now.Year, now.Month, now.Day, 23, 59, 59, DateTimeKind.Utc);
+/*
+                int prevMonth = now.Month == 1 ? 12 : now.Month - 1;
+                int prevYear = now.Month == 1 ? now.Year - 1 : now.Year;
+
+                if (now.Day <= 15)
+                {
+                    from = new DateTime(prevYear, prevMonth, 1, 0, 0, 0, DateTimeKind.Utc);
+                    to = new DateTime(prevYear, prevMonth, 15, 23, 59, 59, DateTimeKind.Utc);
+                }
+                else
+                {
+                    from = new DateTime(prevYear, prevMonth, 16, 0, 0, 0, DateTimeKind.Utc);
+                    int lastDay = DateTime.DaysInMonth(prevYear, prevMonth);
+                    to = new DateTime(prevYear, prevMonth, lastDay, 23, 59, 59, DateTimeKind.Utc);
+                }*/
 
                 List<Interest> interests = await _interestRepository.GetByDateRangeAsync(from, to);
 
@@ -75,13 +85,13 @@ namespace JustRentItAPI.Services.Classes
                     {
                         IsSuccess = true,
                         StatusCode = HttpStatusCode.OK,
-                        Message = "No interests found for previous month."
+                        Message = $"No interests found for the period {from:dd/MM} to {to:dd/MM}."
                     };
                 }
 
                 await SendOwnerMonthlySummaryAsync(interests);
-                await SendUserMonthlySummaryAsync(interests);
 
+                await SendUserMonthlySummaryAsync(interests);
                 await _monthlySummaryRepository.AddAsync(new MonthlySummary
                 {
                     SentAt = DateTime.UtcNow
@@ -91,7 +101,7 @@ namespace JustRentItAPI.Services.Classes
                 {
                     IsSuccess = true,
                     StatusCode = HttpStatusCode.OK,
-                    Message = "Monthly summary sent successfully."
+                    Message = $"Summary for {from:dd/MM/yyyy} - {to:dd/MM/yyyy} sent successfully."
                 };
             }
             catch (Exception ex)

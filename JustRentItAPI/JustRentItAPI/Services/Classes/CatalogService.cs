@@ -11,6 +11,7 @@ using System.Text;
 
 using JustResponse = JustRentItAPI.Models.DTOs.Response;
 using JustGenericResponse = JustRentItAPI.Models.DTOs.Response<byte[]>;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace JustRentItAPI.Services.Classes
 {
@@ -19,6 +20,7 @@ namespace JustRentItAPI.Services.Classes
         private readonly IDressRepository _dressRepository;
         private readonly IWebHostEnvironment _env;
         private readonly Cloudinary _cloudinary;
+        private readonly IConfiguration _config;
 
         private readonly string _baseUrl;
 /*        private readonly string _catalogPath;
@@ -35,9 +37,11 @@ namespace JustRentItAPI.Services.Classes
             _cloudinary = cloudinary;
 
             _baseUrl = config["ApiBaseUrl"];
-/*            _catalogPath = Path.Combine(_env.WebRootPath, "catalog.pdf");
-*/
+            /*            _catalogPath = Path.Combine(_env.WebRootPath, "catalog.pdf");
+            */
             _templatesPath = Path.Combine(_env.WebRootPath, "catalog");
+            _config = config;
+
         }
 
         private string LoadTemplate(string fileName)
@@ -199,14 +203,12 @@ namespace JustRentItAPI.Services.Classes
             }
         }
 
-
-      /*  public async Task<byte[]> GetCatalogAsync()
+        public string GetCatalogUrl()
         {
-            if (!File.Exists(_catalogPath))
-                return Array.Empty<byte>();
-
-            return await File.ReadAllBytesAsync(_catalogPath);
-        }*/
+            var cloudName = _config["CloudinarySettings:CLOUDINARY_CLOUD_NAME"];
+            long version = DateTime.UtcNow.Ticks;
+            return $"https://res.cloudinary.com/{cloudName}/raw/upload/catalog/latest.pdf?v={version}";
+        }
 
         private string BuildHtml(List<Dress> dresses)
         {
@@ -256,8 +258,7 @@ namespace JustRentItAPI.Services.Classes
                                     ?? d.Images.FirstOrDefault();
 
                     var imgPath = mainImage?.ImagePath ?? "Uploads/default.png";
-                    imgPath = imgPath.TrimStart('/');
-                    var fullImg = $"{_baseUrl}{imgPath}";
+                    var fullImg = imgPath.Contains("http") ? imgPath : $"{_baseUrl.TrimEnd('/')}/{imgPath.TrimStart('/')}";
 
                     cardsHtml.Append($@"
                         <div class='card'>

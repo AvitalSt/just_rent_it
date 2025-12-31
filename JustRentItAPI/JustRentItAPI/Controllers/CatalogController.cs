@@ -2,6 +2,7 @@
 using JustRentItAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static Org.BouncyCastle.Math.EC.ECCurve;
 
 namespace JustRentItAPI.Controllers
 {
@@ -36,8 +37,7 @@ namespace JustRentItAPI.Controllers
         [HttpGet]
         public IActionResult GetCatalog()
         {
-            var cloudName = Environment.GetEnvironmentVariable("CLOUDINARY_CLOUD_NAME");
-            var url = $"https://res.cloudinary.com/{cloudName}/raw/upload/catalog/latest.pdf";
+            var url = _catalogService.GetCatalogUrl();
 
             Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0";
             Response.Headers["Pragma"] = "no-cache";
@@ -45,16 +45,5 @@ namespace JustRentItAPI.Controllers
 
             return Redirect(url);
         }
-
-        /* [HttpGet]
-         public async Task<IActionResult> GetCatalog()
-         {
-             var pdf = await _catalogService.GetCatalogAsync();
-             if (pdf.Length == 0)
-                 return NotFound("קטלוג עדיין לא נוצר");
-
-             return File(pdf, "application/pdf", "catalog.pdf");
-         }*/
-
     }
 }

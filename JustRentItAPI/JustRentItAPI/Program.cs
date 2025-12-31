@@ -46,9 +46,9 @@ builder.Services.AddScoped<IDressRepository, DressRepository>();
 builder.Services.AddScoped<IDressService, DressService>();
 
 var cloudinaryAccount = new Account(
-    builder.Configuration["CLOUDINARY_CLOUD_NAME"],
-    builder.Configuration["CLOUDINARY_API_KEY"],
-    builder.Configuration["CLOUDINARY_API_SECRET"]
+    builder.Configuration["CloudinarySettings:CLOUDINARY_CLOUD_NAME"],
+    builder.Configuration["CloudinarySettings:CLOUDINARY_API_KEY"],
+    builder.Configuration["CloudinarySettings:CLOUDINARY_API_SECRET"]
 );
 
 Cloudinary cloudinary = new Cloudinary(cloudinaryAccount);

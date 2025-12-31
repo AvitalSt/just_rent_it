@@ -6,6 +6,6 @@ namespace JustRentItAPI.Services.Interfaces
     {
         Task<Response<byte[]>> GenerateCatalogAsync();
         Task<Response> SaveCatalogAsync(byte[] pdf);
-/*        Task<byte[]> GetCatalogAsync();
-*/    }
+        string GetCatalogUrl();
+    }
 }

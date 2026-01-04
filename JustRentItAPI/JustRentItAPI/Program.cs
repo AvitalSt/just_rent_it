@@ -91,6 +91,7 @@ builder.Services.AddScoped<IMonthlySummaryService, MonthlySummaryService>();
 builder.Services.AddScoped<IInterestExportService, InterestExportService>();
 
 //Catalog
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<ICatalogService, CatalogService>();
 
 builder.Services.AddHttpContextAccessor();

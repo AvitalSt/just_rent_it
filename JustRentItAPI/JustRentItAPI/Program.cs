@@ -51,9 +51,14 @@ var cloudinaryAccount = new Account(
     builder.Configuration["CloudinarySettings:CLOUDINARY_API_SECRET"]
 );
 
-Cloudinary cloudinary = new Cloudinary(cloudinaryAccount);
+builder.Services.AddSingleton(sp =>
+{
+    var cloudinary = new Cloudinary(cloudinaryAccount);
 
-builder.Services.AddSingleton(cloudinary);
+    cloudinary.Api.Client.Timeout = TimeSpan.FromMinutes(10);
+
+    return cloudinary;
+});
 
 // Images
 builder.Services.AddScoped<IImageRepository, ImageRepository>();

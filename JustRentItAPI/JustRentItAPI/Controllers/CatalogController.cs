@@ -16,29 +16,35 @@ namespace JustRentItAPI.Controllers
         {
             _catalogService = catalogService;
         }
-
         [HttpPost("update")]
         [Authorize(Roles = "Admin")]
-        public IActionResult UpdateCatalog()
+        public IActionResult UpdateCatalog([FromServices] IServiceScopeFactory scopeFactory)
         {
             _ = Task.Run(async () =>
             {
-                try
+                using (var scope = scopeFactory.CreateScope())
                 {
-                    Console.WriteLine("[Background] Starting catalog update...");
-                    await _catalogService.UpdateAndSaveCatalogAsync();
-                    Console.WriteLine("[Background] Catalog update finished successfully!");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"[Background] Error: {ex.Message}");
+                    try
+                    {
+                        var scopedCatalogService = scope.ServiceProvider.GetRequiredService<ICatalogService>();
+
+                        Console.WriteLine("[Background] Starting catalog update with a NEW scope...");
+                        await scopedCatalogService.UpdateAndSaveCatalogAsync();
+                        Console.WriteLine("[Background] Catalog update finished successfully!");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Background] FATAL ERROR: {ex.Message}");
+                        if (ex.InnerException != null)
+                            Console.WriteLine($"Inner: {ex.InnerException.Message}");
+                    }
                 }
             });
 
             return Accepted(new
             {
                 IsSuccess = true,
-                Message = "תהליך עדכון הקטלוג התחיל ברקע. תוכל להוריד את הקטלוג המעודכן בעוד כדקה."
+                Message = "תהליך עדכון הקטלוג התחיל ברקע בסביבה מבודדת."
             });
         }
 

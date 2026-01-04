@@ -654,33 +654,114 @@ namespace JustRentItAPI.Services.Classes
 
         public async Task<JustResponse> UpdateAndSaveCatalogAsync()
         {
-            // 1. יצירת ה-PDF (כאן נוצר מערך הבייטים הגדול בזיכרון)
-            var pdfResponse = await GenerateCatalogAsync();
-
-            if (!pdfResponse.IsSuccess || pdfResponse.Data == null)
+            try
             {
+                Console.WriteLine("--- Starting Catalog Generation ---");
+                QuestPDF.Settings.License = LicenseType.Community;
+
+                var dresses = await _dressRepository.GetAllForCatalogAsync();
+                if (dresses == null || !dresses.Any())
+                    return new JustResponse { IsSuccess = false, Message = "No dresses found." };
+
+                // 1. הורדת לוגו ותמונות (אופטימיזציה עם תמונות ממוזערות)
+                var logoBytes = await GetImageFromUrlAsync($"{_baseUrl}logo-img.png");
+
+                using var semaphore = new SemaphoreSlim(10); // מקסימום 10 הורדות במקביל
+                var imageTasks = dresses.Select(async d =>
+                {
+                    await semaphore.WaitAsync();
+                    try
+                    {
+                        var path = d.Images.FirstOrDefault(i => i.IsMain)?.ImagePath ?? d.Images.FirstOrDefault()?.ImagePath;
+                        var url = GetCloudinaryThumbnailUrl(path);
+                        return new { Id = d.DressID, Bytes = await GetImageFromUrlAsync(url) };
+                    }
+                    finally { semaphore.Release(); }
+                });
+
+                var imagesResults = await Task.WhenAll(imageTasks);
+                var imageDict = imagesResults.ToDictionary(x => x.Id, x => x.Bytes);
+
+                // 2. יצירת ה-PDF לתוך MemoryStream
+                using var ms = new MemoryStream();
+
+                Document.Create(container =>
+                {
+                    // דף שער
+                    container.Page(page =>
+                    {
+                        page.Size(PageSizes.A4);
+                        page.ContentFromRightToLeft();
+                        page.Content().Column(col =>
+                        {
+                            if (logoBytes.Length > 0) col.Item().PaddingTop(100).AlignCenter().Width(200).Image(logoBytes);
+                            col.Item().PaddingTop(50).AlignCenter().Text("קטלוג השמלות").ExtraBold().FontSize(40);
+                        });
+                    });
+
+                    // דפי שמלות (12 בדף)
+                    var chunks = dresses.Select((d, i) => new { d, i }).GroupBy(x => x.i / 12);
+                    foreach (var chunk in chunks)
+                    {
+                        container.Page(page =>
+                        {
+                            page.Size(PageSizes.A4);
+                            page.Margin(1, Unit.Centimetre);
+                            page.ContentFromRightToLeft();
+                            page.Content().Grid(grid =>
+                            {
+                                grid.Columns(4);
+                                grid.Spacing(10);
+                                foreach (var item in chunk)
+                                {
+                                    grid.Item().Column(col =>
+                                    {
+                                        if (imageDict.TryGetValue(item.d.DressID, out var b) && b.Length > 0)
+                                            col.Item().Height(160).Image(b);
+                                        col.Item().AlignCenter().Text(item.d.Name).FontSize(9);
+                                        col.Item().AlignCenter().Text($"{item.d.Price} ₪").Bold();
+                                    });
+                                }
+                            });
+                        });
+                    }
+                }).GeneratePdf(ms);
+
+                // 3. העלאה ל-Cloudinary
+                ms.Position = 0;
+                var uploadParams = new RawUploadParams
+                {
+                    File = new FileDescription("catalog.pdf", ms),
+                    PublicId = "catalog/latest",
+                    Overwrite = true,
+                    Invalidate = true
+                };
+
+                var result = await _cloudinary.UploadAsync(uploadParams);
+
+                // ניקוי זיכרון ידני
+                imageDict.Clear();
+
                 return new JustResponse
                 {
-                    IsSuccess = false,
-                    Message = pdfResponse.Message,
-                    StatusCode = pdfResponse.StatusCode
+                    IsSuccess = result.Error == null,
+                    StatusCode = result.Error == null ? HttpStatusCode.OK : HttpStatusCode.InternalServerError
                 };
             }
-
-            // 2. שמירה ל-Cloudinary
-            var saveResponse = await SaveCatalogAsync(pdfResponse.Data);
-
-            // 3. שחרור הזיכרון - חשוב מאוד ל-1,000 שמלות!
-            // אנחנו מוחקים את הנתונים מהאובייקט לפני שהוא חוזר לקונטרולר
-            pdfResponse.Data = null;
-
-            // 4. מחזירים רק תשובת סטטוס (בלי ה-PDF עצמו)
-            return new JustResponse
+            catch (Exception ex)
             {
-                IsSuccess = saveResponse.IsSuccess,
-                Message = saveResponse.IsSuccess ? "הקטלוג עודכן ונשמר בהצלחה בשרת הענן" : saveResponse.Message,
-                StatusCode = saveResponse.StatusCode
-            };
+                Console.WriteLine($"Error: {ex.Message}");
+                return new JustResponse { IsSuccess = false, Message = ex.Message };
+            }
+        }
+        private string GetCloudinaryThumbnailUrl(string? path)
+        {
+            if (string.IsNullOrEmpty(path)) return "";
+            var url = path.Contains("http") ? path : $"{_baseUrl}{path.TrimStart('/')}";
+            // הפיכת התמונה ל-Thumbnail קטן כבר בשרת של Cloudinary
+            if (url.Contains("cloudinary"))
+                return url.Replace("/upload/", "/upload/w_250,h_350,c_fill,q_auto:low,f_jpg/");
+            return url;
         }
     }
 }

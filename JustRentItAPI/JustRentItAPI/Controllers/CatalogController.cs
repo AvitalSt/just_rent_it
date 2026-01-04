@@ -19,14 +19,27 @@ namespace JustRentItAPI.Controllers
 
         [HttpPost("update")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Response>> UpdateCatalog()
+        public IActionResult UpdateCatalog()
         {
-            var response = await _catalogService.UpdateAndSaveCatalogAsync();
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    Console.WriteLine("[Background] Starting catalog update...");
+                    await _catalogService.UpdateAndSaveCatalogAsync();
+                    Console.WriteLine("[Background] Catalog update finished successfully!");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[Background] Error: {ex.Message}");
+                }
+            });
 
-            if (response.IsSuccess)
-                return Ok(response);
-
-            return StatusCode((int)response.StatusCode, response);
+            return Accepted(new
+            {
+                IsSuccess = true,
+                Message = "תהליך עדכון הקטלוג התחיל ברקע. תוכל להוריד את הקטלוג המעודכן בעוד כדקה."
+            });
         }
 
         [HttpGet]

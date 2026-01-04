@@ -2,6 +2,7 @@
 using JustRentItAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace JustRentItAPI.Controllers
 {
@@ -20,17 +21,13 @@ namespace JustRentItAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Response>> UpdateCatalog()
         {
-            var pdfResponse = await _catalogService.GenerateCatalogAsync();
+            // ה-Service עושה את כל העבודה הכבדה והלוגיקה
+            var response = await _catalogService.UpdateAndSaveCatalogAsync();
 
-            if (!pdfResponse.IsSuccess || pdfResponse.Data == null)
-                return StatusCode((int)pdfResponse.StatusCode, pdfResponse);
+            if (response.IsSuccess)
+                return Ok(response);
 
-            var saveResponse = await _catalogService.SaveCatalogAsync(pdfResponse.Data);
-
-            if (saveResponse.IsSuccess)
-                return Ok(saveResponse);
-
-            return StatusCode((int)saveResponse.StatusCode, saveResponse);
+            return StatusCode((int)response.StatusCode, response);
         }
 
         [HttpGet]

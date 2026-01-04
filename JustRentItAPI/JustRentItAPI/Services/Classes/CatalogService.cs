@@ -454,30 +454,36 @@ namespace JustRentItAPI.Services.Classes
             {
                 QuestPDF.Settings.License = LicenseType.Community;
 
-                // 1. שליפת השמלות מהמאגר
                 var dresses = await _dressRepository.GetAllForCatalogAsync();
                 if (dresses == null || !dresses.Any())
                     return new JustGenericResponse { IsSuccess = false, Message = "לא נמצאו שמלות לקטלוג." };
 
-                // 2. הכנת משימות להורדת תמונות במקביל (ביצועים גבוהים)
+                // הגדרת סמפור שמגביל ל-10 הורדות במקביל
+                using var semaphore = new SemaphoreSlim(10);
                 var logoTask = GetImageFromUrlAsync($"{_baseUrl}logo-img.png");
 
                 var imageTasks = dresses.Select(async d =>
                 {
-                    var mainImage = d.Images.FirstOrDefault(img => img.IsMain)?.ImagePath ?? d.Images.FirstOrDefault()?.ImagePath;
-                    if (string.IsNullOrEmpty(mainImage)) return new { Id = d.DressID, Bytes = Array.Empty<byte>() };
+                    await semaphore.WaitAsync(); // מחכה לתורו (רק 10 יכולים לעבור)
+                    try
+                    {
+                        var mainImage = d.Images.FirstOrDefault(img => img.IsMain)?.ImagePath ?? d.Images.FirstOrDefault()?.ImagePath;
+                        if (string.IsNullOrEmpty(mainImage)) return new { Id = d.DressID, Bytes = Array.Empty<byte>() };
 
-                    var imgUrl = mainImage.Contains("http") ? mainImage : $"{_baseUrl}{mainImage.TrimStart('/')}";
+                        var imgUrl = mainImage.Contains("http") ? mainImage : $"{_baseUrl}{mainImage.TrimStart('/')}";
 
-                    // אופטימיזציה של Cloudinary - הקטנת התמונה לפני ההורדה
-                    if (imgUrl.Contains("cloudinary"))
-                        imgUrl = imgUrl.Replace("/upload/", "/upload/w_300,h_450,c_fill,q_auto,f_jpg/");
+                        if (imgUrl.Contains("cloudinary"))
+                            imgUrl = imgUrl.Replace("/upload/", "/upload/w_300,h_450,c_fill,q_auto,f_jpg/");
 
-                    var bytes = await GetImageFromUrlAsync(imgUrl);
-                    return new { Id = d.DressID, Bytes = bytes };
+                        var bytes = await GetImageFromUrlAsync(imgUrl);
+                        return new { Id = d.DressID, Bytes = bytes };
+                    }
+                    finally
+                    {
+                        semaphore.Release(); // משחרר את המקום הבא בתור
+                    }
                 });
 
-                // המתנה לסיום כל ההורדות
                 var imagesResults = await Task.WhenAll(imageTasks);
                 var logoBytes = await logoTask;
                 var imageDict = imagesResults.ToDictionary(x => x.Id, x => x.Bytes);
@@ -627,6 +633,22 @@ namespace JustRentItAPI.Services.Classes
             {
                 return Array.Empty<byte>();
             }
+        }
+
+        public async Task<JustResponse> UpdateAndSaveCatalogAsync()
+        {
+            var pdfResponse = await GenerateCatalogAsync();
+            if (!pdfResponse.IsSuccess || pdfResponse.Data == null)
+                return pdfResponse;
+
+            var saveResponse = await SaveCatalogAsync(pdfResponse.Data);
+
+            return new JustResponse
+            {
+                IsSuccess = saveResponse.IsSuccess,
+                Message = saveResponse.IsSuccess ? "הקטלוג עודכן ונשמר בהצלחה" : saveResponse.Message,
+                StatusCode = saveResponse.StatusCode
+            };
         }
     }
 }

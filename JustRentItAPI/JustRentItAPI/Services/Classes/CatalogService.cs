@@ -452,19 +452,22 @@ namespace JustRentItAPI.Services.Classes
         {
             try
             {
+                Console.WriteLine("--- Starting Catalog Generation ---");
                 QuestPDF.Settings.License = LicenseType.Community;
 
                 var dresses = await _dressRepository.GetAllForCatalogAsync();
                 if (dresses == null || !dresses.Any())
                     return new JustGenericResponse { IsSuccess = false, Message = "לא נמצאו שמלות לקטלוג." };
 
-                // הגדרת סמפור שמגביל ל-10 הורדות במקביל
+                Console.WriteLine($"Found {dresses.Count} dresses. Starting image downloads...");
+
                 using var semaphore = new SemaphoreSlim(10);
                 var logoTask = GetImageFromUrlAsync($"{_baseUrl}logo-img.png");
 
+                int completed = 0;
                 var imageTasks = dresses.Select(async d =>
                 {
-                    await semaphore.WaitAsync(); // מחכה לתורו (רק 10 יכולים לעבור)
+                    await semaphore.WaitAsync();
                     try
                     {
                         var mainImage = d.Images.FirstOrDefault(img => img.IsMain)?.ImagePath ?? d.Images.FirstOrDefault()?.ImagePath;
@@ -472,15 +475,21 @@ namespace JustRentItAPI.Services.Classes
 
                         var imgUrl = mainImage.Contains("http") ? mainImage : $"{_baseUrl}{mainImage.TrimStart('/')}";
 
+                        // אופטימיזציה קריטית של גודל התמונה לפני שהיא מגיעה לשרת שלך
                         if (imgUrl.Contains("cloudinary"))
-                            imgUrl = imgUrl.Replace("/upload/", "/upload/w_300,h_450,c_fill,q_auto,f_jpg/");
+                            imgUrl = imgUrl.Replace("/upload/", "/upload/w_250,h_350,c_limit,q_auto:low,f_jpg/");
 
                         var bytes = await GetImageFromUrlAsync(imgUrl);
+
+                        // לוג התקדמות כל 20 שמלות כדי לא להציף את הלוגים
+                        var count = Interlocked.Increment(ref completed);
+                        if (count % 20 == 0) Console.WriteLine($"Downloaded {count}/{dresses.Count} images...");
+
                         return new { Id = d.DressID, Bytes = bytes };
                     }
                     finally
                     {
-                        semaphore.Release(); // משחרר את המקום הבא בתור
+                        semaphore.Release();
                     }
                 });
 
@@ -488,7 +497,9 @@ namespace JustRentItAPI.Services.Classes
                 var logoBytes = await logoTask;
                 var imageDict = imagesResults.ToDictionary(x => x.Id, x => x.Bytes);
 
-                // 3. יצירת מסמך ה-PDF
+                Console.WriteLine("All images downloaded. Creating PDF document...");
+
+                // יצירת ה-PDF
                 var pdfBytes = Document.Create(container =>
                 {
                     // דף שער
@@ -581,10 +592,16 @@ namespace JustRentItAPI.Services.Classes
                     }
                 }).GeneratePdf();
 
+                Console.WriteLine($"PDF generated successfully. Size: {pdfBytes.Length / 1024 / 1024} MB");
+
+                // ניקוי זיכרון אקטיבי
+                imageDict.Clear();
+
                 return new JustGenericResponse { IsSuccess = true, Data = pdfBytes, StatusCode = HttpStatusCode.OK };
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"FATAL ERROR in GenerateCatalog: {ex.Message}");
                 return new JustGenericResponse { IsSuccess = false, Message = "שגיאה ביצירת הקטלוג: " + ex.Message };
             }
         }
@@ -637,16 +654,31 @@ namespace JustRentItAPI.Services.Classes
 
         public async Task<JustResponse> UpdateAndSaveCatalogAsync()
         {
+            // 1. יצירת ה-PDF (כאן נוצר מערך הבייטים הגדול בזיכרון)
             var pdfResponse = await GenerateCatalogAsync();
-            if (!pdfResponse.IsSuccess || pdfResponse.Data == null)
-                return pdfResponse;
 
+            if (!pdfResponse.IsSuccess || pdfResponse.Data == null)
+            {
+                return new JustResponse
+                {
+                    IsSuccess = false,
+                    Message = pdfResponse.Message,
+                    StatusCode = pdfResponse.StatusCode
+                };
+            }
+
+            // 2. שמירה ל-Cloudinary
             var saveResponse = await SaveCatalogAsync(pdfResponse.Data);
 
+            // 3. שחרור הזיכרון - חשוב מאוד ל-1,000 שמלות!
+            // אנחנו מוחקים את הנתונים מהאובייקט לפני שהוא חוזר לקונטרולר
+            pdfResponse.Data = null;
+
+            // 4. מחזירים רק תשובת סטטוס (בלי ה-PDF עצמו)
             return new JustResponse
             {
                 IsSuccess = saveResponse.IsSuccess,
-                Message = saveResponse.IsSuccess ? "הקטלוג עודכן ונשמר בהצלחה" : saveResponse.Message,
+                Message = saveResponse.IsSuccess ? "הקטלוג עודכן ונשמר בהצלחה בשרת הענן" : saveResponse.Message,
                 StatusCode = saveResponse.StatusCode
             };
         }

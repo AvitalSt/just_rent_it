@@ -21,7 +21,6 @@ namespace JustRentItAPI.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<Response>> UpdateCatalog()
         {
-            // ה-Service עושה את כל העבודה הכבדה והלוגיקה
             var response = await _catalogService.UpdateAndSaveCatalogAsync();
 
             if (response.IsSuccess)

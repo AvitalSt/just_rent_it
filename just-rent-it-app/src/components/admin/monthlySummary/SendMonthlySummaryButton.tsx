@@ -6,7 +6,17 @@ import { SuccessMessage } from "@/components/ui/SuccessMessage";
 import { sendMonthlySummary } from "@/services/monthlySummaryService";
 import { useState } from "react";
 
-export default function SendMonthlySummaryButton({ onSuccess }: { onSuccess: () => void }) {
+export default function SendMonthlySummaryButton({
+  onSuccess,
+  daysToSplit,
+  dayIndex,
+  disabled,
+}: {
+  onSuccess: () => void;
+  daysToSplit: number;
+  dayIndex: number;
+  disabled?: boolean;
+}) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -16,8 +26,8 @@ export default function SendMonthlySummaryButton({ onSuccess }: { onSuccess: () 
     setSuccess("");
     setError("");
     try {
-      await sendMonthlySummary();
-      setSuccess("נשלח בהצלחה");
+      await sendMonthlySummary(daysToSplit, dayIndex);
+      setSuccess(`נשלח יום ${dayIndex}/${daysToSplit} בהצלחה`);
       onSuccess();
     } catch {
       setError("תקלה בשליחה");
@@ -27,11 +37,11 @@ export default function SendMonthlySummaryButton({ onSuccess }: { onSuccess: () 
   };
 
   return (
-    <div className="my-6">
+    <div className="min-w-[170px]">
       {error && <ErrorMessage message={error} />}
       {success && <SuccessMessage message={success} />}
-      <Button onClick={handleSendSummary} disabled={loading} variant="primary">
-        שליחת הודעה חודשית לכל משתמשי האתר
+      <Button onClick={handleSendSummary} disabled={loading || !!disabled} variant="primary">
+        {loading ? "שולח..." : `שליחה יום ${dayIndex}/${daysToSplit}`}
       </Button>
     </div>
   );

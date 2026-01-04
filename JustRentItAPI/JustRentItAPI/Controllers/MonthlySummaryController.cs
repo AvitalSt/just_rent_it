@@ -16,11 +16,22 @@ namespace JustRentItAPI.Controllers
             _monthlySummaryService = monthlySummaryService;
         }
 
+        [HttpGet("preview")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<Response<MonthlySummaryPreviewDTO>>> Preview()
+        {
+            var response = await _monthlySummaryService.PreviewMonthlySummaryAsync();
+            if (response.IsSuccess)
+                return Ok(response);
+
+            return StatusCode((int)response.StatusCode, response);
+        }
+
         [HttpPost("send")]
         [Authorize(Roles = "Admin")]
-        public async Task<ActionResult<Response>> SendMonthlySummary()
+        public async Task<ActionResult<Response>> SendMonthlySummary([FromBody] MonthlySummarySendRequestDTO req)
         {
-            var response = await _monthlySummaryService.SendMonthlySummaryAsync();
+            var response = await _monthlySummaryService.SendMonthlySummaryAsync(req.DaysToSplit, req.DayIndex);
             if (response.IsSuccess)
                 return Ok(response);
 

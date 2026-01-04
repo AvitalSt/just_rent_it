@@ -46,6 +46,7 @@ namespace JustRentItAPI.Repositories.Classes
         public async Task<List<Dress>> GetAllForCatalogAsync()
         {
             return await _context.Dresses
+            .AsNoTracking()
             .Where(d => d.Status == DressStatus.Active)
             .Include(d => d.Images)
             .ToListAsync();

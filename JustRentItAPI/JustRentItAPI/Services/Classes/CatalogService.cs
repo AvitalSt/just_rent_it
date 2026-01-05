@@ -23,13 +23,15 @@ namespace JustRentItAPI.Services.Classes
         private readonly string _baseUrl;
         private readonly IHttpClientFactory _httpClientFactory;
         private static bool _fontRegistered = false;
+        private readonly IServiceScopeFactory _scopeFactory;
 
         public CatalogService(
             IDressRepository dresses,
             IWebHostEnvironment env,
             IConfiguration config,
             Cloudinary cloudinary,
-            IHttpClientFactory httpClientFactory)
+            IHttpClientFactory httpClientFactory,
+            IServiceScopeFactory scopeFactory)
         {
             _dressRepository = dresses;
             _env = env;
@@ -38,6 +40,27 @@ namespace JustRentItAPI.Services.Classes
             _httpClientFactory = httpClientFactory;
             _baseUrl = config["ApiBaseUrl"]?.TrimEnd('/') + "/";
             RegisterHebrewFont();
+            _scopeFactory = scopeFactory;
+        }
+
+        public void RunUpdateTaskInBackground()
+        {
+            Task.Run(async () =>
+            {
+                using (var scope = _scopeFactory.CreateScope())
+                {
+                    try
+                    {
+                        var scopedCatalogService = scope.ServiceProvider.GetRequiredService<ICatalogService>();
+
+                        await scopedCatalogService.UpdateAndSaveCatalogAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[Background] ERROR: {ex.Message}");
+                    }
+                }
+            });
         }
 
         public async Task<JustGenericResponse> GenerateCatalogAsync()
@@ -45,6 +68,7 @@ namespace JustRentItAPI.Services.Classes
             try
             {
                 QuestPDF.Settings.License = LicenseType.Community;
+
                 var dresses = await _dressRepository.GetAllForCatalogAsync();
 
                 if (dresses == null || !dresses.Any())
@@ -62,7 +86,7 @@ namespace JustRentItAPI.Services.Classes
 
                 var logoBytes = await GetImageFromUrlAsync(httpClient, $"{_baseUrl}logo-img.png");
 
-                using var semaphore = new SemaphoreSlim(10);
+                 var semaphore = new SemaphoreSlim(10);
                 var imageTasks = dresses.Select(async d =>
                 {
                     await semaphore.WaitAsync();
@@ -164,11 +188,10 @@ namespace JustRentItAPI.Services.Classes
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Catalog Generation Error: {ex}");
                 return new JustGenericResponse
                 {
                     IsSuccess = false,
-                    StatusCode = HttpStatusCode.InternalServerError,
+                    StatusCode = HttpStatusCode.InternalServerError ,
                     Message = "שגיאה פנימית ביצירת הקטלוג."
                 };
             }
@@ -216,8 +239,8 @@ namespace JustRentItAPI.Services.Classes
         public string GetCatalogUrl()
         {
             var cloudName = _config["CloudinarySettings:CLOUDINARY_CLOUD_NAME"];
-            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            return $"https://res.cloudinary.com/{cloudName}/raw/upload/catalog/latest.pdf?v={timestamp}";
+            var version = Guid.NewGuid().ToString("N");
+            return $"https://res.cloudinary.com/{cloudName}/raw/upload/catalog/latest.pdf?v={version}";
         }
 
         private async Task<byte[]> GetImageFromUrlAsync(HttpClient client, string url)
@@ -264,7 +287,15 @@ namespace JustRentItAPI.Services.Classes
         public async Task<JustResponse> UpdateAndSaveCatalogAsync()
         {
             var gen = await GenerateCatalogAsync();
-            if (!gen.IsSuccess) return new JustResponse { IsSuccess = false, StatusCode = gen.StatusCode, Message = gen.Message };
+
+            if (!gen.IsSuccess)
+                return new JustResponse
+                {
+                    IsSuccess = false,
+                    StatusCode = gen.StatusCode,
+                    Message = gen.Message
+                };
+
             return await SaveCatalogAsync(gen.Data!);
         }
     }

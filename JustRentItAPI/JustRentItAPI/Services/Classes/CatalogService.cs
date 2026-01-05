@@ -175,18 +175,18 @@ namespace JustRentItAPI.Services.Classes
                                         else
                                             col.Item().Height(145).Placeholder();
 
-                                        col.Item().PaddingTop(2).Row(row =>
-                                        {
-                                            row.RelativeItem().AlignCenter().Text(item.d.Name).Bold().FontSize(9);
-                                        });
+                                        col.Item().PaddingTop(2).AlignCenter().Text(item.d.Name)
+                                            .Bold()
+                                            .FontSize(9)
+                                            .LineHeight(1);
 
-                                        col.Item().Row(row =>
-                                        {
-                                            row.RelativeItem().AlignCenter().Text($"{item.d.Price} ₪").FontSize(10).Bold().FontColor(Colors.Black);
-                                        });
+                                        col.Item().AlignCenter().Text($"{item.d.Price} ₪")
+                                            .FontSize(10)
+                                            .Bold()
+                                            .FontColor(Colors.Black);
                                     });
-                                }
-                            });
+                                }                
+                        });
                         });
                     }
                 }).GeneratePdf();

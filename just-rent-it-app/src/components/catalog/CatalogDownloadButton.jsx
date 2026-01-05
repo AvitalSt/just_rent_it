@@ -84,6 +84,19 @@ export default function CatalogDownloadButton() {
             </>
           )}
         </button>
+
+        <p className="text-center text-gray-500 text-sm mt-6">
+          אם את לא מצליחה להוריד את הקטלוג,
+          <br />
+          <a
+            href="mailto:info@justrentitdress.com"
+            className="text-black font-semibold underline mr-1"
+          >
+            שלחי לנו הודעה
+          </a>
+          <br />
+          info@justrentitdress.com
+        </p>
       </div>
     </div>
   );

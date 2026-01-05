@@ -73,7 +73,7 @@ namespace JustRentItAPI.Services.Classes
                     {
                         page.DefaultTextStyle(x => x.FontFamily("Heebo"));
                         page.Size(PageSizes.A4);
-                        page.Margin(1, Unit.Centimetre); // צמצום שוליים כללי
+                        page.Margin(1, Unit.Centimetre); 
                         page.ContentFromRightToLeft();
 
                         page.Content().Column(col =>
@@ -118,29 +118,27 @@ namespace JustRentItAPI.Services.Classes
                         {
                             page.DefaultTextStyle(x => x.FontFamily("Heebo"));
                             page.Size(PageSizes.A4);
-                            page.Margin(1, Unit.Centimetre);
+                            page.Margin(0.8f, Unit.Centimetre); // הקטנו מעט שוליים כדי להרוויח מקום
                             page.ContentFromRightToLeft();
 
-                            page.Content().PaddingVertical(10).Grid(grid =>
+                            page.Content().PaddingVertical(5).Grid(grid =>
                             {
                                 grid.Columns(4);
-                                grid.VerticalSpacing(20);
-                                grid.HorizontalSpacing(15);
+                                grid.VerticalSpacing(15);   // צמצום רווח אנכי
+                                grid.HorizontalSpacing(10); // צמצום רווח אופקי
 
                                 foreach (var item in chunk)
                                 {
-                                    // הסרת Border ו-Padding כדי שהתמונה תהיה נקייה ותיכנס בקלות
                                     grid.Item().Column(col =>
                                     {
+                                        // צמצום הגובה מ-160 ל-145 כדי להבטיח שייכנסו 4 שורות
                                         if (imageDict.TryGetValue(item.d.DressID, out var b) && b.Length > 0)
-                                            col.Item().Height(160).Image(b).FitArea();
+                                            col.Item().Height(145).Image(b).FitArea();
                                         else
-                                            col.Item().Height(160).Placeholder();
+                                            col.Item().Height(145).Placeholder();
 
-                                        col.Item().PaddingTop(4).AlignCenter().Text(item.d.Name).Bold().FontSize(9).LineHeight(1);
-
-                                        // שינוי המחיר לשחור (Black)
-                                        col.Item().AlignCenter().Text($"{item.d.Price} ₪").FontSize(10).Bold().FontColor(Colors.Black);
+                                        col.Item().PaddingTop(2).AlignCenter().Text(item.d.Name).Bold().FontSize(8).LineHeight(1);
+                                        col.Item().AlignCenter().Text($"{item.d.Price} ₪").FontSize(9).Bold().FontColor(Colors.Black);
                                     });
                                 }
                             });

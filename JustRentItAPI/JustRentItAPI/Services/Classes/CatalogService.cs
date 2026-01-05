@@ -22,6 +22,7 @@ namespace JustRentItAPI.Services.Classes
         private readonly IConfiguration _config;
         private readonly string _baseUrl;
         private readonly IHttpClientFactory _httpClientFactory;
+        private static bool _fontRegistered = false;
 
         public CatalogService(
             IDressRepository dresses,
@@ -47,9 +48,19 @@ namespace JustRentItAPI.Services.Classes
                 var dresses = await _dressRepository.GetAllForCatalogAsync();
 
                 if (dresses == null || !dresses.Any())
-                    return new JustGenericResponse { IsSuccess = false, Message = "לא נמצאו שמלות לקטלוג." };
+                {
+                    return new JustGenericResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.NotFound,
+                        Message = "לא נמצאו שמלות לקטלוג."
+                    };
+                }
 
-                var logoBytes = await GetImageFromUrlAsync($"{_baseUrl}logo-img.png");
+                var httpClient = _httpClientFactory.CreateClient();
+                httpClient.Timeout = TimeSpan.FromSeconds(30);
+
+                var logoBytes = await GetImageFromUrlAsync(httpClient, $"{_baseUrl}logo-img.png");
 
                 using var semaphore = new SemaphoreSlim(10);
                 var imageTasks = dresses.Select(async d =>
@@ -59,7 +70,7 @@ namespace JustRentItAPI.Services.Classes
                     {
                         var path = d.Images.FirstOrDefault(i => i.IsMain)?.ImagePath ?? d.Images.FirstOrDefault()?.ImagePath;
                         var url = GetCloudinaryThumbnailUrl(path);
-                        return new { Id = d.DressID, Bytes = await GetImageFromUrlAsync(url) };
+                        return new { Id = d.DressID, Bytes = await GetImageFromUrlAsync(httpClient, url) };
                     }
                     finally { semaphore.Release(); }
                 });
@@ -73,7 +84,7 @@ namespace JustRentItAPI.Services.Classes
                     {
                         page.DefaultTextStyle(x => x.FontFamily("Heebo"));
                         page.Size(PageSizes.A4);
-                        page.Margin(1, Unit.Centimetre); 
+                        page.Margin(1, Unit.Centimetre);
                         page.ContentFromRightToLeft();
 
                         page.Content().Column(col =>
@@ -84,14 +95,17 @@ namespace JustRentItAPI.Services.Classes
                             col.Item().PaddingTop(20).AlignCenter().Text("קטלוג השמלות של JustRentIt")
                                 .ExtraBold().FontSize(36).FontColor(Colors.Black);
 
-                            col.Item().PaddingTop(10).AlignCenter().Text(text => {
+                            col.Item().PaddingTop(10).AlignCenter().Text(text =>
+                            {
                                 text.Span("מצאת את השמלה המושלמת?\n").FontSize(22);
                                 text.Span("רוצה פרטים נוספים או להשכיר?").FontSize(22);
                             });
 
-                            col.Item().PaddingTop(25).Row(row => {
+                            col.Item().PaddingTop(25).Row(row =>
+                            {
                                 row.RelativeItem();
-                                row.ConstantItem(350).Background(Colors.Black).Padding(20).Column(inner => {
+                                row.ConstantItem(350).Background(Colors.Black).Padding(20).Column(inner =>
+                                {
                                     inner.Item().AlignCenter().Text("ניתן לפנות אלינו במייל:").FontColor(Colors.White).FontSize(20);
                                     inner.Item().AlignCenter().Text("info@justrentitdress.com").FontColor(Colors.White).ExtraBold().FontSize(24);
                                 });
@@ -100,7 +114,8 @@ namespace JustRentItAPI.Services.Classes
 
                             col.Item().PaddingTop(20).AlignCenter().Text("נא לצרף בפנייה:").FontSize(22).Bold();
 
-                            col.Item().PaddingTop(10).PaddingRight(100).Column(list => {
+                            col.Item().PaddingTop(10).PaddingRight(100).Column(list =>
+                            {
                                 string[] items = { "צילום של השמלה", "שם מלא", "טלפון ליצירת קשר", "כתובת מייל" };
                                 foreach (var item in items)
                                 {
@@ -118,27 +133,26 @@ namespace JustRentItAPI.Services.Classes
                         {
                             page.DefaultTextStyle(x => x.FontFamily("Heebo"));
                             page.Size(PageSizes.A4);
-                            page.Margin(0.8f, Unit.Centimetre); // הקטנו מעט שוליים כדי להרוויח מקום
+                            page.Margin(0.8f, Unit.Centimetre);
                             page.ContentFromRightToLeft();
 
                             page.Content().PaddingVertical(5).Grid(grid =>
                             {
                                 grid.Columns(4);
-                                grid.VerticalSpacing(15);   // צמצום רווח אנכי
-                                grid.HorizontalSpacing(10); // צמצום רווח אופקי
+                                grid.VerticalSpacing(15);
+                                grid.HorizontalSpacing(10);
 
                                 foreach (var item in chunk)
                                 {
                                     grid.Item().Column(col =>
                                     {
-                                        // צמצום הגובה מ-160 ל-145 כדי להבטיח שייכנסו 4 שורות
                                         if (imageDict.TryGetValue(item.d.DressID, out var b) && b.Length > 0)
                                             col.Item().Height(145).Image(b).FitArea();
                                         else
                                             col.Item().Height(145).Placeholder();
 
-                                        col.Item().PaddingTop(2).AlignCenter().Text(item.d.Name).Bold().FontSize(8).LineHeight(1);
-                                        col.Item().AlignCenter().Text($"{item.d.Price} ₪").FontSize(9).Bold().FontColor(Colors.Black);
+                                        col.Item().PaddingTop(2).AlignCenter().Text(item.d.Name).Bold().FontSize(9);
+                                        col.Item().AlignCenter().Text($"{item.d.Price} ₪").FontSize(10).Bold().FontColor(Colors.Black);
                                     });
                                 }
                             });
@@ -146,19 +160,18 @@ namespace JustRentItAPI.Services.Classes
                     }
                 }).GeneratePdf();
 
-                return new JustGenericResponse { IsSuccess = true, Data = pdfBytes, StatusCode = HttpStatusCode.OK };
+                return new JustGenericResponse { IsSuccess = true, StatusCode = HttpStatusCode.OK, Data = pdfBytes };
             }
             catch (Exception ex)
             {
-                return new JustGenericResponse { IsSuccess = false, Message = ex.Message };
+                Console.WriteLine($"Catalog Generation Error: {ex}");
+                return new JustGenericResponse
+                {
+                    IsSuccess = false,
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Message = "שגיאה פנימית ביצירת הקטלוג."
+                };
             }
-        }
-
-        public async Task<JustResponse> UpdateAndSaveCatalogAsync()
-        {
-            var gen = await GenerateCatalogAsync();
-            if (!gen.IsSuccess) return new JustResponse { IsSuccess = false, Message = gen.Message };
-            return await SaveCatalogAsync(gen.Data);
         }
 
         public async Task<JustResponse> SaveCatalogAsync(byte[] pdf)
@@ -173,25 +186,50 @@ namespace JustRentItAPI.Services.Classes
                     Overwrite = true,
                     Invalidate = true
                 };
+
                 var result = await _cloudinary.UploadAsync(uploadParams);
-                return new JustResponse { IsSuccess = result.Error == null, StatusCode = HttpStatusCode.OK };
+
+                if (result.Error != null)
+                {
+                    return new JustResponse
+                    {
+                        IsSuccess = false,
+                        StatusCode = HttpStatusCode.BadRequest,
+                        Message = result.Error.Message
+                    };
+                }
+
+                return new JustResponse { IsSuccess = true, StatusCode = HttpStatusCode.OK };
             }
-            catch (Exception ex) { return new JustResponse { IsSuccess = false, Message = ex.Message }; }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Cloudinary Upload Error: {ex}");
+                return new JustResponse
+                {
+                    IsSuccess = false,
+                    StatusCode = HttpStatusCode.InternalServerError,
+                    Message = "שגיאה בשמירת הקטלוג לענן."
+                };
+            }
         }
 
         public string GetCatalogUrl()
         {
             var cloudName = _config["CloudinarySettings:CLOUDINARY_CLOUD_NAME"];
-            return $"https://res.cloudinary.com/{cloudName}/raw/upload/v{DateTime.UtcNow.Ticks}/catalog/latest.pdf";
+            var timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            return $"https://res.cloudinary.com/{cloudName}/raw/upload/catalog/latest.pdf?v={timestamp}";
         }
 
-        private async Task<byte[]> GetImageFromUrlAsync(string url)
+        private async Task<byte[]> GetImageFromUrlAsync(HttpClient client, string url)
         {
             try
             {
-                var client = _httpClientFactory.CreateClient();
-                client.Timeout = TimeSpan.FromSeconds(20);
-                return await client.GetByteArrayAsync(url);
+                using var request = new System.Net.Http.HttpRequestMessage(System.Net.Http.HttpMethod.Get, url);
+                request.Headers.Accept.ParseAdd("image/*");
+                var response = await client.SendAsync(request);
+
+                if (!response.IsSuccessStatusCode) return Array.Empty<byte>();
+                return await response.Content.ReadAsByteArrayAsync();
             }
             catch { return Array.Empty<byte>(); }
         }
@@ -199,14 +237,17 @@ namespace JustRentItAPI.Services.Classes
         private string GetCloudinaryThumbnailUrl(string? path)
         {
             if (string.IsNullOrEmpty(path)) return "";
-            var url = path.Contains("http") ? path : $"{_baseUrl}{path.TrimStart('/')}";
-            if (url.Contains("cloudinary"))
+            var url = path.StartsWith("http", StringComparison.OrdinalIgnoreCase) ? path : $"{_baseUrl}{path.TrimStart('/')}";
+
+            if (url.Contains("/upload/") && url.Contains("res.cloudinary.com"))
                 return url.Replace("/upload/", "/upload/w_300,h_450,c_fill,g_auto,q_auto:good,f_jpg/");
+
             return url;
         }
 
         private void RegisterHebrewFont()
         {
+            if (_fontRegistered) return;
             try
             {
                 var fontPath = Path.Combine(_env.ContentRootPath, "Assets", "Fonts", "Heebo-VariableFont_wght.ttf");
@@ -214,9 +255,17 @@ namespace JustRentItAPI.Services.Classes
                 {
                     using var fontStream = File.OpenRead(fontPath);
                     FontManager.RegisterFont(fontStream);
+                    _fontRegistered = true;
                 }
             }
             catch (Exception ex) { Console.WriteLine($"Font error: {ex.Message}"); }
+        }
+
+        public async Task<JustResponse> UpdateAndSaveCatalogAsync()
+        {
+            var gen = await GenerateCatalogAsync();
+            if (!gen.IsSuccess) return new JustResponse { IsSuccess = false, StatusCode = gen.StatusCode, Message = gen.Message };
+            return await SaveCatalogAsync(gen.Data!);
         }
     }
 }

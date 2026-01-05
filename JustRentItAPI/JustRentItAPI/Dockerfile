@@ -1,11 +1,13 @@
-#See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
-
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libgdiplus \
+    libfontconfig1 \
+    libfreetype6 \
+    libicu-dev \
+    libharfbuzz0b \
     fonts-noto-core \
     fonts-freefont-ttf \
     locales && \
@@ -27,12 +29,17 @@ RUN dotnet restore "JustRentItAPI/JustRentItAPI.csproj"
 
 COPY . .
 WORKDIR "/src/JustRentItAPI"
-RUN dotnet publish "JustRentItAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet build "JustRentItAPI.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
+FROM build AS publish
+ARG BUILD_CONFIGURATION=Release
+RUN dotnet publish "JustRentItAPI.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
-COPY --from=build /app/publish .
+COPY --from=publish /app/publish .
+
+COPY ["JustRentItAPI/Assets", "Assets/"]
 
 ENV ASPNETCORE_URLS=http://+:${PORT:-8080}
 

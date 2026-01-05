@@ -36,4 +36,14 @@
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Assets\Fonts\" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update="Assets\Fonts\Heebo-VariableFont_wght.ttf">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </None>
+	</ItemGroup>
+
 </Project>

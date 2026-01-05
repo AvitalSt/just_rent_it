@@ -421,6 +421,7 @@ using System.Text;
 
 using JustResponse = JustRentItAPI.Models.DTOs.Response;
 using JustGenericResponse = JustRentItAPI.Models.DTOs.Response<byte[]>;
+using QuestPDF.Drawing;
 
 namespace JustRentItAPI.Services.Classes
 {
@@ -446,6 +447,7 @@ namespace JustRentItAPI.Services.Classes
             _config = config;
             _httpClientFactory = httpClientFactory;
             _baseUrl = config["ApiBaseUrl"]?.TrimEnd('/') + "/";
+            RegisterHebrewFont();
         }
 
         public async Task<JustGenericResponse> GenerateCatalogAsync()
@@ -502,9 +504,9 @@ namespace JustRentItAPI.Services.Classes
                 // יצירת ה-PDF
                 var pdfBytes = Document.Create(container =>
                 {
-                    // דף שער
                     container.Page(page =>
                     {
+                        page.DefaultTextStyle(x => x.FontFamily("Heebo").FontSize(11));
                         page.Size(PageSizes.A4);
                         page.Margin(1, Unit.Centimetre);
                         page.PageColor(Colors.White);
@@ -687,9 +689,9 @@ namespace JustRentItAPI.Services.Classes
 
                 Document.Create(container =>
                 {
-                    // דף שער
                     container.Page(page =>
                     {
+                        page.DefaultTextStyle(x => x.FontFamily("Heebo").FontSize(11));
                         page.Size(PageSizes.A4);
                         page.ContentFromRightToLeft();
                         page.Content().Column(col =>
@@ -762,6 +764,29 @@ namespace JustRentItAPI.Services.Classes
             if (url.Contains("cloudinary"))
                 return url.Replace("/upload/", "/upload/w_250,h_350,c_fill,q_auto:low,f_jpg/");
             return url;
+        }
+
+        private void RegisterHebrewFont()
+        {
+            try
+            {
+                var fontPath = Path.Combine(_env.ContentRootPath, "Assets", "Fonts", "Heebo-VariableFont_wght.ttf");
+
+                if (File.Exists(fontPath))
+                {
+                    using var fontStream = File.OpenRead(fontPath);
+                    FontManager.RegisterFont(fontStream);
+                    Console.WriteLine("Hebrew font registered successfully.");
+                }
+                else
+                {
+                    Console.WriteLine($"FONT ERROR: File not found at {fontPath}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Font registration failed: {ex.Message}");
+            }
         }
     }
 }

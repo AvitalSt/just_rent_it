@@ -18,6 +18,7 @@ export default function MostViewedSection({ initial }: MostViewedSectionProps) {
           <Link
             key={dress.dressID}
             href={`/dresses/${dress.dressID}`}
+            prefetch={false}
             className="aspect-[3/4] bg-gray-200 relative overflow-hidden group"
           >
             <img
@@ -27,6 +28,7 @@ export default function MostViewedSection({ initial }: MostViewedSectionProps) {
                   : `${API_BASE_ORIGIN}${dress.mainImage}`
               }
               alt={dress.name}
+              loading="lazy"
               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
@@ -37,6 +39,7 @@ export default function MostViewedSection({ initial }: MostViewedSectionProps) {
       <div className="text-center mt-12">
         <Link
           href="/dresses"
+          prefetch={false}
           className="inline-block px-10 py-4 border-2 border-black text-black text-sm tracking-widest uppercase font-medium hover:bg-black hover:text-white transition-all duration-300"
         >
           לכל השמלות

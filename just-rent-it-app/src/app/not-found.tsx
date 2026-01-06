@@ -23,6 +23,7 @@ export default function NotFound() {
 
         <Link
           href="/"
+          prefetch={false}
           className="inline-flex items-center gap-3 bg-black text-white px-8 py-4 font-semibold hover:bg-gray-800 transition-all duration-200"
         >
           <span>לדף הבית</span>

@@ -27,7 +27,7 @@ export default function Interest({
 
       <p className="text-gray-600 text-sm">
         הודעה עם הפרטים שלך תישלח לבעלת השמלה. ניתן לעדכן את הפרטים בעמוד{" "}
-        <Link href="/profile" className="text-blue-600 underline">
+        <Link href="/profile" prefetch={false} className="text-blue-600 underline">
           הפרופיל →
         </Link>
       </p>

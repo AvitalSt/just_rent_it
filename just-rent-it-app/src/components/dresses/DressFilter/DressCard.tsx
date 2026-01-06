@@ -41,6 +41,7 @@ export default function DressCard({
     <>
       <Link
         href={`/dresses/${dress.dressID}`}
+        prefetch={false}
         className="group relative block bg-white overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300"
       >
         <div className="relative w-full aspect-[2/3] bg-gray-200 overflow-hidden">

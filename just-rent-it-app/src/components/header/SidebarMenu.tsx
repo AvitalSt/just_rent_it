@@ -73,6 +73,7 @@ export default function SidebarMenu({ isOpen, onClose }: SidebarMenuProps) {
               <Link
                 key={item.href}
                 href={item.href}
+                prefetch={false}
                 onClick={onClose}
                 className="
                   flex items-center px-4 py-3.5 rounded-lg
@@ -114,6 +115,7 @@ export default function SidebarMenu({ isOpen, onClose }: SidebarMenuProps) {
           ) : (
             <Link
               href="/login"
+              prefetch={false}
               onClick={onClose}
               className="
                 w-full flex items-center gap-4 px-4 py-3.5 rounded-lg

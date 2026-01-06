@@ -38,7 +38,7 @@ export default function SitePolicy() {
                   למתעניינת בשמלה שלך, כדי שתוכל ליצור איתך קשר ישיר.
                   <br />
                   ניתן לעדכן את הפרטים בכל עת דרך אזור {""}
-                  <Link href="/profile" className="text-blue-600 underline">
+                  <Link href="/profile" prefetch={false} className="text-blue-600 underline">
                     המשתמש
                   </Link>
                 </p>
@@ -161,7 +161,7 @@ export default function SitePolicy() {
                 <br /> פרטי ההתקשרות שלך (שם, טלפון, אימייל) יועברו לבעלת השמלה.{" "}
                 <br />
                 ניתן לעדכן את הפרטים בכל עת דרך אזור {""}
-                <Link href="/profile" className="text-blue-600 underline">
+                <Link href="/profile" prefetch={false} className="text-blue-600 underline">
                   המשתמש
                 </Link>
                 <br />

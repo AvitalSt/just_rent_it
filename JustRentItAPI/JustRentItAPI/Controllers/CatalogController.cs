@@ -1,8 +1,6 @@
-﻿using JustRentItAPI.Models.DTOs;
-using JustRentItAPI.Services.Interfaces;
+﻿using JustRentItAPI.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace JustRentItAPI.Controllers
 {
@@ -34,10 +32,6 @@ namespace JustRentItAPI.Controllers
         public IActionResult GetCatalog()
         {
             var url = _catalogService.GetCatalogUrl();
-
-            Response.Headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0";
-            Response.Headers["Pragma"] = "no-cache";
-            Response.Headers["Expires"] = "0";
 
             return Redirect(url);
         }

@@ -5,7 +5,7 @@ import { CredentialResponse } from "@react-oauth/google";
 import { loginGoogle } from "@/services/authService";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ErrorMessage } from "../ui/ErrorMessage";
 import { useDispatch } from "react-redux";
 import { handleSuccessfulAuth } from "@/utils/authHelpers";

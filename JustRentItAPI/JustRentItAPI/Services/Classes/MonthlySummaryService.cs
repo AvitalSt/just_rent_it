@@ -2,7 +2,6 @@
 using JustRentItAPI.Models.Entities;
 using JustRentItAPI.Repositories.Interfaces;
 using JustRentItAPI.Services.Interfaces;
-using System;
 using System.Net;
 
 namespace JustRentItAPI.Services.Classes
@@ -80,7 +79,7 @@ namespace JustRentItAPI.Services.Classes
                         OwnerEmails = ownerEmails,
                         UserEmails = userEmails
                     },
-                    Message = $"Preview for {from:MM/yyyy} ready." /////////////////
+                    Message = $"Preview for {from:MM/yyyy} ready."
                 };
             }
             catch (Exception ex)
@@ -105,7 +104,7 @@ namespace JustRentItAPI.Services.Classes
                 var now = DateTime.UtcNow;
                 var (from, to) = GetPreviousMonthRangeUtc(now);
 
-                List<Interest> interests = await _interestRepository.GetByDateRangeAsync(from, to);
+                var interests = await _interestRepository.GetByDateRangeAsync(from, to);
 
                 if (!interests.Any())
                 {
@@ -148,7 +147,7 @@ namespace JustRentItAPI.Services.Classes
             }
         }
 
-      
+        //פונציה טהורה מחזירה תמיד tuple
         private static (DateTime from, DateTime to) GetPreviousMonthRangeUtc(DateTime nowUtc)
         {
             int year = nowUtc.Month == 1 ? nowUtc.Year - 1 : nowUtc.Year;
@@ -170,7 +169,6 @@ namespace JustRentItAPI.Services.Classes
 
         private async Task SendOwnerMonthlySummaryAsync(List<Interest> interests)
         {
-            // קיבוץ לפי בעלת השמלה
             var groupedByOwner = interests.GroupBy(i => i.Dress.UserID);
 
             foreach (var ownerGroup in groupedByOwner)
@@ -179,7 +177,6 @@ namespace JustRentItAPI.Services.Classes
                 var ownerName = owner.FirstName;
                 var ownerEmail = owner.Email;
 
-                // קיבוץ לפי שמלה -> רשימת מתעניינות
                 var dressData = ownerGroup
                      .GroupBy(i => i.Dress)
                      .Select(g => (
@@ -187,7 +184,7 @@ namespace JustRentItAPI.Services.Classes
                           DressUrl: $"{_frontendBaseUrl}/dresses/{g.Key.DressID}",
                           InterestedNames: g
                             .Select(x => $"{x.User.FirstName} {x.User.LastName}")
-                            .Distinct()//שלא יופיע שם פעמים
+                            .Distinct()
                             .ToList()
                     ))
                     .ToList();

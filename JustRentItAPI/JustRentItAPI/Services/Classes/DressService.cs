@@ -5,6 +5,7 @@ using JustRentItAPI.Models.Enums;
 using JustRentItAPI.Repositories.Interfaces;
 using JustRentItAPI.Services.Interfaces;
 using JustRentItAPI.Utils;
+using Org.BouncyCastle.Ocsp;
 using System.Net;
 
 namespace JustRentItAPI.Services.Classes
@@ -240,7 +241,7 @@ namespace JustRentItAPI.Services.Classes
 
                 dress.Status = DressStatus.Deleted;
                 await _dressRepository.UpdateAsync(dress);
-                await _mailService.SendDressDeletedAsync(dress);
+                await _mailService.SendDressDeletedAsync(dress.User.Email, dress.User.FirstName, dress.Name);
 
                 var userFavoriteDressIds = await UserHelper.GetUserFavoriteDressIdsAsync(_httpContextAccessor, _favoriteRepository);
                 var dressDto = DressMapper.MapToDetailedDTO(dress, userFavoriteDressIds);
@@ -279,7 +280,8 @@ namespace JustRentItAPI.Services.Classes
 
                 dress.Status = DressStatus.Active;
                 await _dressRepository.UpdateAsync(dress);
-                await _mailService.SendDressActivatedAsync(dress);
+                await _mailService.SendDressActivatedAsync(dress.User.Email, dress.User.FirstName, dress.Name, dress.DressID
+);
 
                 var userFavoriteDressIds = await UserHelper.GetUserFavoriteDressIdsAsync(_httpContextAccessor, _favoriteRepository);
                 var dressDto = DressMapper.MapToDetailedDTO(dress, userFavoriteDressIds);

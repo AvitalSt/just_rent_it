@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using JustRentItAPI.Models.Entities;
 using JustRentItAPI.Services.Interfaces;
 using SendGrid;
 using SendGrid.Helpers.Mail;
@@ -9,8 +8,7 @@ namespace JustRentItAPI.Services.Classes
 {
     public class MailService : IMailService
     {
-
-        private readonly string _smtpPassword;
+        private readonly string _sendGridApiKey;
         private readonly string _From;
         private readonly string _smtpNoReply;
 
@@ -19,7 +17,7 @@ namespace JustRentItAPI.Services.Classes
         public MailService(IConfiguration config)
         {
             _From = config["MailSettings:From"];
-            _smtpPassword = config["MailSettings:Password"];
+            _sendGridApiKey = config["MailSettings:SendGridApiKey"];
             _smtpNoReply = config["MailSettings:NoReply"];
 
             _baseUrl = config["FrontendUrl"];
@@ -27,10 +25,9 @@ namespace JustRentItAPI.Services.Classes
 
         public async Task<Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null)
         {
-            var apiKey = _smtpPassword; 
-            var client = new SendGridClient(apiKey);
+            var client = new SendGridClient(_sendGridApiKey);
 
-            var senderEmail = !string.IsNullOrEmpty(fromEmail) ? fromEmail : _From;
+            var senderEmail = string.IsNullOrEmpty(fromEmail) ? _From : fromEmail;
             var from = new EmailAddress(senderEmail, "Just Rent It dress");
             var to = new EmailAddress(toEmail);
             var msg = MailHelper.CreateSingleEmail(from, to, subject, "", body);
@@ -41,32 +38,31 @@ namespace JustRentItAPI.Services.Classes
 
                 if (response.IsSuccessStatusCode)
                 {
-                    Console.WriteLine("MAIL SENT VIA API OK");
                     return new Response { IsSuccess = true, Message = "Sent", StatusCode = HttpStatusCode.OK };
                 }
 
                 var errorBody = await response.Body.ReadAsStringAsync();
-                Console.WriteLine($"API ERROR: {response.StatusCode} - {errorBody}");
                 return new Response { IsSuccess = false, Message = "API Error", StatusCode = response.StatusCode };
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"FATAL API ERROR: {ex.Message}");
                 return new Response { IsSuccess = false, Message = ex.Message, StatusCode = HttpStatusCode.InternalServerError };
             }
         }
 
-        public async Task SendDressDeletedAsync(Dress dress)
+        public async Task SendDressDeletedAsync(string email, string firstName, string dressName)
         {
-            if (dress.User == null || string.IsNullOrWhiteSpace(dress.User.Email))
+            if (string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(firstName) ||
+                string.IsNullOrWhiteSpace(dressName))
                 return;
 
             string body = $@"
                             <div style='font-family: Heebo, Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7;'>
 
-                            שלום {dress.User.FirstName},<br/>
+                            שלום {firstName},<br/>
 
-                            רצינו לעדכן שהשמלה שלך <strong>""{dress.Name}""</strong> נמחקה מהמערכת.<br/>
+                            רצינו לעדכן שהשמלה שלך <strong>""{dressName}""</strong> נמחקה מהמערכת.<br/>
 
                             אם מדובר בטעות, או במידה שתרצי להחזיר אותה - אפשר ליצור איתנו קשר בכל זמן.<br/>
 
@@ -76,29 +72,32 @@ namespace JustRentItAPI.Services.Classes
                             </div>";
 
             await SendEmailAsync(
-                dress.User.Email,
-                $"עדכון בנוגע לשמלה שלך - {dress.Name}",
+                email,
+                $"עדכון בנוגע לשמלה שלך - {dressName}",
                 body
             );
         }
 
-        public async Task SendDressActivatedAsync(Dress dress)
+        public async Task SendDressActivatedAsync(string email, string firstName, string dressName, int dressId)
         {
-            if (dress.User == null || string.IsNullOrWhiteSpace(dress.User.Email))
+            if (string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(firstName) ||
+                string.IsNullOrWhiteSpace(dressName) ||
+                dressId <= 0)
                 return;
 
             string body = $@"
                             <div style='font-family: Heebo, Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7;'>
 
-                            שלום {dress.User.FirstName},<br/>
+                            שלום {firstName},<br/>
                             <br/>
-                            שמחים לעדכן שהשמלה שלך <strong>""{dress.Name}""</strong> אושרה כעת והועלתה לאתר! 🎉<br/>
+                            שמחים לעדכן שהשמלה שלך <strong>""{dressName}""</strong> אושרה כעת והועלתה לאתר! 🎉<br/>
                             <br/>
                             היא זמינה כעת לצפייה על ידי כל משתמשי האתר.<br>
                             במידה ומשתמש יתעניין בשמלה שלך - תקבלי על כך עדכון ישירות למייל.<br/>
                             <br/>
                             תוכלי לראות את השמלה בלינק:<br>
-                            <a href='{_baseUrl}/dresses/{dress.DressID}' style='color:#000; font-weight:bold;'>לחצי כאן לצפייה בשמלה</a><br/>
+                            <a href='{_baseUrl}/dresses/{dressId}' style='color:#000; font-weight:bold;'>לחצי כאן לצפייה בשמלה</a><br/>
                             <br/>
                             אם יש שינוי שתרצי לבצע בשמלה (מחיר, תמונות, פרטים) - ניתן לערוך אותה בכל זמן.<br/>
                             <br/>
@@ -110,8 +109,8 @@ namespace JustRentItAPI.Services.Classes
                             </div>";
 
             await SendEmailAsync(
-                dress.User.Email,
-                $"השמלה שלך אושרה והועלתה לאתר - {dress.Name}",
+                email,
+                $"השמלה שלך אושרה והועלתה לאתר - {dressName}",
                 body
             );
         }
@@ -119,6 +118,13 @@ namespace JustRentItAPI.Services.Classes
 
         public async Task SendOwnerFollowUpAsync(string ownerEmail, string ownerName, string interestedName, string dressName, int dressId)
         {
+            if (string.IsNullOrWhiteSpace(ownerEmail) ||
+                string.IsNullOrWhiteSpace(ownerName) ||
+                string.IsNullOrWhiteSpace(interestedName) ||
+                string.IsNullOrWhiteSpace(dressName) ||
+                dressId <= 0)
+                return;
+
             var subject = $"עדכון לגבי השמלה \"{dressName}\" באתר Just Rent It dress";
 
             var dressUrl = $"{_baseUrl}/dresses/{dressId}";
@@ -147,6 +153,12 @@ namespace JustRentItAPI.Services.Classes
 
         public async Task SendUserFollowUpAsync(string userEmail, string userName, string dressName, int dressId)
         {
+            if (string.IsNullOrWhiteSpace(userEmail) ||
+                string.IsNullOrWhiteSpace(userName) ||
+                string.IsNullOrWhiteSpace(dressName) ||
+                dressId <= 0)
+                return;
+
             var subject = "שמלה שהתעניינת בה באתר Just Rent It dress";
 
             var dressUrl = $"{_baseUrl}/dresses/{dressId}";
@@ -173,27 +185,34 @@ namespace JustRentItAPI.Services.Classes
             await SendEmailAsync(userEmail, subject, body);
         }
 
-        public async Task SendUserInterestAsync(User owner, User user, Dress dress)
+        public async Task SendUserInterestAsync(string userEmail, string userFirstName, string dressName, int dressId, string ownerFirstName, string ownerLastName, string ownerEmail, string ownerPhone)
         {
-            if (string.IsNullOrWhiteSpace(user.Email))
+            if (string.IsNullOrWhiteSpace(userEmail) ||
+                string.IsNullOrWhiteSpace(userFirstName) ||
+                string.IsNullOrWhiteSpace(dressName) ||
+                dressId <= 0 ||
+                string.IsNullOrWhiteSpace(ownerFirstName) ||
+                string.IsNullOrWhiteSpace(ownerLastName) ||
+                string.IsNullOrWhiteSpace(ownerEmail) ||
+                string.IsNullOrWhiteSpace(ownerPhone))
                 return;
 
-            var dressUrl = $"{_baseUrl}/dresses/{dress.DressID}";
+            var dressUrl = $"{_baseUrl}/dresses/{dressId}";
 
             string body = $@"
                             <div style='font-family: Heebo, Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7;'>
-                            שלום {user.FirstName},<br/>
-                            תודה על ההתעניינות בשמלה {dress.Name} ✨
+                            שלום {userFirstName},<br/>
+                            תודה על ההתעניינות בשמלה {dressName} ✨
                             <br/>
                             <a href='{dressUrl}' target='_blank' style='color:#6b4eff;'>
-                                {dress.Name}
+                                {dressName}
                             </a>
                             <br/>
                             <br/>
                             <strong>פרטי הקשר של בעלת השמלה:</strong><br>
-                            • שם: {owner.FirstName} {owner.LastName}<br>
-                            • אימייל: {owner.Email}<br>
-                            • טלפון: {owner.Phone}<br/>
+                            • שם: {ownerFirstName} {ownerLastName}<br>
+                            • אימייל: {ownerEmail}<br>
+                            • טלפון: {ownerPhone}<br/>
                             <br/>
                             <strong>בבקשה, כשאת יוצרת קשר עם בעלת השמלה צייני שהגעת דרך האתר Just Rent It dress</strong>.<br/>
                             <br/>
@@ -205,33 +224,40 @@ namespace JustRentItAPI.Services.Classes
                             </div>";
 
             await SendEmailAsync(
-                user.Email,
+                userEmail,
                 "פרטי השמלה שבחרת ב-Just Rent It dress",
                 body
             );
         }
 
-        public async Task SendOwnerInterestAsync(User owner, User user, Dress dress, string? message)
+        public async Task SendOwnerInterestAsync(string ownerEmail, string ownerFirstName, string userFirstName, string userLastName, string userEmail, string userPhone, string dressName, int dressId, string? message)
         {
-            if (string.IsNullOrWhiteSpace(owner.Email))
+            if (string.IsNullOrWhiteSpace(ownerEmail) ||
+                string.IsNullOrWhiteSpace(ownerFirstName) ||
+                string.IsNullOrWhiteSpace(userFirstName) ||
+                string.IsNullOrWhiteSpace(userLastName) ||
+                string.IsNullOrWhiteSpace(userEmail) ||
+                string.IsNullOrWhiteSpace(userPhone) ||
+                string.IsNullOrWhiteSpace(dressName) ||
+                dressId <= 0)
                 return;
 
-            var dressUrl = $"{_baseUrl}/dresses/{dress.DressID}";
+            var dressUrl = $"{_baseUrl}/dresses/{dressId}";
 
             string body = $@"
                             <div style='font-family: Heebo, Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7;'>
-                            שלום {owner.FirstName},<br/>
+                            שלום {ownerFirstName},<br/>
                             <br/>
-                            רצינו לעדכן אותך ש־{user.FirstName} {user.LastName} התעניינה בשמלה שלך ""{dress.Name}"" וצפויה ליצור איתך קשר בהמשך.<br/>
+                            רצינו לעדכן אותך ש־{userFirstName} {userLastName} התעניינה בשמלה שלך ""{dressName}"" וצפויה ליצור איתך קשר בהמשך.<br/>
                             <a href='{dressUrl}' target='_blank' style='color:#6b4eff;'>
-                                {dress.Name}
+                                {dressName}
                             </a>
                             <br/>
                             <br/>
                             <strong>פרטי המתעניינת:</strong><br>
-                            • שם: {user.FirstName} {user.LastName}<br>
-                            • אימייל: {user.Email}<br>
-                            • טלפון: {user.Phone}<br>
+                            • שם: {userFirstName} {userLastName}<br>
+                            • אימייל: {userEmail}<br>
+                            • טלפון: {userPhone}<br>
                             {(string.IsNullOrWhiteSpace(message) ? "" : $"• הודעה שצירפה: {message}<br>")}<br>
                             נשמח שתעדכני אותנו מה קורה בהמשך האם יצרתן קשר? האם השמלה הושכרה?<br/>
                             במידה ולא נקבל עדכון מצידך, תישלח אלייך תזכורת אוטומטית.<br>
@@ -246,16 +272,17 @@ namespace JustRentItAPI.Services.Classes
                             </div>";
 
             await SendEmailAsync(
-                owner.Email,
+                ownerEmail,
                 $"עדכון מאתר Just Rent It dress" +
-                $" – התעניינות חדשה בשמלה שלך {dress.Name}",
+                $" – התעניינות חדשה בשמלה שלך {dressName}",
                 body
             );
         }
 
         public async Task SendPaymentAsync(string ownerEmail, string ownerName)
         {
-            if (string.IsNullOrWhiteSpace(ownerEmail))
+            if (string.IsNullOrWhiteSpace(ownerEmail) ||
+                string.IsNullOrWhiteSpace(ownerName))
                 return;
 
             string subject = "הודעה על השכרת השמלה – יש להעביר את העמלה";
@@ -291,6 +318,11 @@ namespace JustRentItAPI.Services.Classes
 
         public async Task SendOwnerMonthlySummaryAsync(string ownerEmail, string ownerName, List<(string DressName, string DressUrl, List<string> InterestedNames)> dresses)
         {
+            if (string.IsNullOrWhiteSpace(ownerEmail) ||
+                string.IsNullOrWhiteSpace(ownerName) ||
+                dresses == null || dresses.Count == 0)
+                return;
+
             var body = BuildOwnerSummaryEmail(ownerName, dresses);
 
             await SendEmailAsync(
@@ -302,7 +334,9 @@ namespace JustRentItAPI.Services.Classes
 
         public async Task SendUserMonthlySummaryAsync(string userEmail, string userName, List<(string Name, string Url)> dresses)
         {
-            if (dresses == null || dresses.Count == 0)
+            if (string.IsNullOrWhiteSpace(userEmail) ||
+                string.IsNullOrWhiteSpace(userName) ||
+                dresses == null || dresses.Count == 0)
                 return;
 
             var body = BuildUserSummaryEmail(userName, dresses);
@@ -316,6 +350,8 @@ namespace JustRentItAPI.Services.Classes
 
         private string BuildOwnerSummaryEmail(string ownerName, List<(string DressName, string DressUrl, List<string> InterestedNames)> dressData)
         {
+            if (dressData == null || dressData.Count == 0)
+                return string.Empty;
             // בניית השורות לכל שמלה
             //nbsp Non-Breaking Space מייצר רווח
             //string.Join מחברת מחזורו
@@ -348,6 +384,9 @@ namespace JustRentItAPI.Services.Classes
 
         private string BuildUserSummaryEmail(string userName, List<(string Name, string Url)> dresses)
         {
+            if (dresses == null || dresses.Count == 0)
+                return string.Empty;
+
             var listHtml = string.Join("<br/>", dresses.Select(d => $"• <a href='{d.Url}' style='font-weight:bold;'>{d.Name}</a>"));
 
             return $@"
@@ -372,12 +411,22 @@ namespace JustRentItAPI.Services.Classes
         }
 
 
-        public async Task<Response> SendPasswordResetEmailAsync(User user, string resetLink)
+        public async Task<Response> SendPasswordResetEmailAsync(string email, string firstName, string resetLink)
         {
+            if (string.IsNullOrWhiteSpace(email) ||
+                string.IsNullOrWhiteSpace(firstName) ||
+                string.IsNullOrWhiteSpace(resetLink))
+                return new Response
+                {
+                    IsSuccess = false,
+                    Message = "Missing email, name or reset link.",
+                    StatusCode = HttpStatusCode.BadRequest
+                };
+
             var subject = "בקשת איפוס סיסמה";
             var body = $@"
                         <div dir='rtl' style='font-family: Arial, sans-serif; text-align: right; line-height: 1.7;'>
-                            <h2>שלום {user.FirstName},</h2>
+                            <h2>שלום {firstName},</h2>
                             <p>קיבלת בקשה לאיפוס הסיסמה שלך.</p>
                             <p>לחצי על הקישור הבא כדי לעדכן את הסיסמה:</p>
                             <a href='{resetLink}' style='color:#0000EE; text-decoration: underline;'>לחץ כאן</a>
@@ -386,7 +435,7 @@ namespace JustRentItAPI.Services.Classes
                             <strong>Just Rent It dress</strong></p>
                         </div>
                     ";
-            return await SendEmailAsync(user.Email, subject, body, _smtpNoReply);
+            return await SendEmailAsync(email, subject, body, _smtpNoReply);
         }
     }
 }

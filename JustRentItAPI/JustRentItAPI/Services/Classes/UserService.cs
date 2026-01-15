@@ -217,7 +217,7 @@ namespace JustRentItAPI.Services.Classes
 
                 var clientBaseUrl = _configuration["ClientBaseUrl"];
                 string resetLink = $"{clientBaseUrl}/reset-password/{token}";
-                var emailResponse = await _mailService.SendPasswordResetEmailAsync(user, resetLink);
+                var emailResponse = await _mailService.SendPasswordResetEmailAsync(user.Email, user.FirstName, resetLink);
 
                 if (!emailResponse.IsSuccess)
                 {

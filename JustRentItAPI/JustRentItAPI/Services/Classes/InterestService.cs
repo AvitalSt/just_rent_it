@@ -57,17 +57,28 @@ namespace JustRentItAPI.Services.Classes
                 var user = await _userRepository.GetUserByIdAsync(userId.Value);
 
                 await _mailService.SendOwnerInterestAsync(
-                    owner,
-                    user,
-                    dress,
-                    dto.Message
-                );
+                   owner.Email,
+                   owner.FirstName,
+                   user.FirstName,
+                   user.LastName,
+                   user.Email,
+                   user.Phone,
+                   dress.Name,
+                   dress.DressID,
+                   dto.Message
+               );
 
                 await _mailService.SendUserInterestAsync(
-                    owner,
-                    user,
-                    dress
+                    user.Email,
+                    user.FirstName,
+                    dress.Name,
+                    dress.DressID,
+                    owner.FirstName,
+                    owner.LastName,
+                    owner.Email,
+                    owner.Phone
                 );
+
                 return new Response
                 {
                     IsSuccess = true,

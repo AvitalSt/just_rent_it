@@ -7,9 +7,9 @@ namespace JustRentItAPI.Services.Interfaces
     {
         Task<Response> SendEmailAsync(string toEmail, string subject, string body, string? fromEmail = null);
 
-        Task SendDressDeletedAsync(Dress dress);
+        Task SendDressDeletedAsync(string email, string firstName, string dressName);
 
-        Task SendDressActivatedAsync(Dress dress);
+        Task SendDressActivatedAsync(string email, string firstName, string dressName, int dressId);
 
 
         Task SendOwnerFollowUpAsync(string ownerEmail, string ownerName, string interestedName,string dressName, int dressId);
@@ -18,9 +18,9 @@ namespace JustRentItAPI.Services.Interfaces
 
         Task SendPaymentAsync(string ownerEmail, string ownerName);
 
-        Task SendUserInterestAsync(User owner, User user, Dress dress);
+        Task SendUserInterestAsync(string userEmail, string userFirstName, string dressName, int dressId, string ownerFirstName, string ownerLastName, string ownerEmail, string ownerPhone);
 
-        Task SendOwnerInterestAsync(User owner, User user, Dress dress, string? message);
+        Task SendOwnerInterestAsync(string ownerEmail, string ownerFirstName, string userFirstName, string userLastName, string userEmail, string userPhone, string dressName, int dressId, string? message);
 
 
         Task SendOwnerMonthlySummaryAsync(string ownerEmail, string ownerName, List<(string DressName, string DressUrl, List<string> InterestedNames)> dresses);
@@ -28,6 +28,6 @@ namespace JustRentItAPI.Services.Interfaces
         Task SendUserMonthlySummaryAsync(string userEmail, string userName, List<(string Name, string Url)> dresses);
 
 
-        Task<Response> SendPasswordResetEmailAsync(User user, string resetLink);
+        Task<Response> SendPasswordResetEmailAsync(string email, string firstName, string resetLink);
     }
 }

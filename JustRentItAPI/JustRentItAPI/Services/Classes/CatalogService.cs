@@ -1,5 +1,4 @@
-﻿using JustRentItAPI.Models.Entities;
-using JustRentItAPI.Repositories.Interfaces;
+﻿using JustRentItAPI.Repositories.Interfaces;
 using JustRentItAPI.Services.Interfaces;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
@@ -63,7 +62,14 @@ namespace JustRentItAPI.Services.Classes
             });
         }
 
-        public async Task<JustGenericResponse> GenerateCatalogAsync()
+        public string GetCatalogUrl()
+        {
+            var cloudName = _config["CloudinarySettings:CLOUDINARY_CLOUD_NAME"];
+            var version = Guid.NewGuid().ToString("N");
+            return $"https://res.cloudinary.com/{cloudName}/raw/upload/catalog/latest.pdf?v={version}";
+        }
+
+        private async Task<JustGenericResponse> GenerateCatalogAsync()
         {
             try
             {
@@ -86,7 +92,7 @@ namespace JustRentItAPI.Services.Classes
 
                 var logoBytes = await GetImageFromUrlAsync(httpClient, $"{_baseUrl}logo-img.png");
 
-                 var semaphore = new SemaphoreSlim(10);
+                var semaphore = new SemaphoreSlim(10);
                 var imageTasks = dresses.Select(async d =>
                 {
                     await semaphore.WaitAsync();
@@ -204,7 +210,7 @@ namespace JustRentItAPI.Services.Classes
             }
         }
 
-        public async Task<JustResponse> SaveCatalogAsync(byte[] pdf)
+        private async Task<JustResponse> SaveCatalogAsync(byte[] pdf)
         {
             try
             {
@@ -241,13 +247,6 @@ namespace JustRentItAPI.Services.Classes
                     Message = "שגיאה בשמירת הקטלוג לענן."
                 };
             }
-        }
-
-        public string GetCatalogUrl()
-        {
-            var cloudName = _config["CloudinarySettings:CLOUDINARY_CLOUD_NAME"];
-            var version = Guid.NewGuid().ToString("N");
-            return $"https://res.cloudinary.com/{cloudName}/raw/upload/catalog/latest.pdf?v={version}";
         }
 
         private async Task<byte[]> GetImageFromUrlAsync(HttpClient client, string url)

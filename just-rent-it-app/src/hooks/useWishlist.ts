@@ -3,10 +3,7 @@
 import { useLocalWishlist } from "./useLocalWishlist";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { toggleWishlist } from "@/store/userSlice";
-import {
-  addToWishlist,
-  removeFromWishlist,
-} from "@/services/wishlistService";
+import { addToWishlist, removeFromWishlist } from "@/services/wishlistService";
 
 export function useWishlist() {
   const dispatch = useAppDispatch();
@@ -23,9 +20,7 @@ export function useWishlist() {
   } = useLocalWishlist();
 
   const isFavorite = (id: number) =>
-    user
-      ? user.wishlistDressIds?.includes(id)
-      : isLocalFavorite(id);
+    user ? user.wishlistDressIds?.includes(id) : isLocalFavorite(id);
 
   const add = async (id: number) => {
     if (!user) {

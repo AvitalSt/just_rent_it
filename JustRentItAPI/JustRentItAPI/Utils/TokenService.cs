@@ -18,10 +18,10 @@ namespace JustRentItAPI.Utils
         public string GenerateToken(int userId, string email, UserRole role, TimeSpan tokenExpiry)
         {
             var secretKey= _configuration["JwtSettings:SecretKey"];
-            var issuer=_configuration["JwtSettings:issuer"];
-            var audience = _configuration["JwtSettings:Audience"];
+            var issuer=_configuration["JwtSettings:issuer"]; //מי יצר את הטוקן
+            var audience = _configuration["JwtSettings:Audience"]; // מי מורשה לקבל את הטוקן
 
-            var tokenHandler = new JwtSecurityTokenHandler();
+            var tokenHandler = new JwtSecurityTokenHandler(); //מחלקה שמספקת פונק ליצירה וכיתבה של JWT
 
             var tokenDescriptor = new SecurityTokenDescriptor
             {

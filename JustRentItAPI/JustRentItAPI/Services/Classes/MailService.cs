@@ -10,7 +10,7 @@ namespace JustRentItAPI.Services.Classes
     {
         private readonly string _sendGridApiKey;
         private readonly string _From;
-        private readonly string _smtpNoReply;
+        private readonly string _noReplyEmail;
 
         private readonly string _baseUrl;
 
@@ -18,7 +18,7 @@ namespace JustRentItAPI.Services.Classes
         {
             _From = config["MailSettings:From"];
             _sendGridApiKey = config["MailSettings:SendGridApiKey"];
-            _smtpNoReply = config["MailSettings:NoReply"];
+            _noReplyEmail = config["MailSettings:NoReply"];
 
             _baseUrl = config["FrontendUrl"];
         }
@@ -435,7 +435,7 @@ namespace JustRentItAPI.Services.Classes
                             <strong>Just Rent It dress</strong></p>
                         </div>
                     ";
-            return await SendEmailAsync(email, subject, body, _smtpNoReply);
+            return await SendEmailAsync(email, subject, body, _noReplyEmail);
         }
     }
 }
